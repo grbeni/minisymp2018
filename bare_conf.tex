@@ -19,14 +19,146 @@
 \usepackage{cite}
 %\usepackage{caption}
 \hyphenation{UPPAAL}
-\newcommand{\thetatool}{\textsf{theta}}
-\newcommand{\Thetatool}{\textsf{Theta}}
+\newcommand{\framework}[0]{\textsf{gamma framework}}
+\newcommand{\Framework}[0]{\textsf{Gamma framework}}
+\renewcommand{\gamma}[0]{\textsf{gamma}}
+\renewcommand{\Gamma}[0]{\textsf{Gamma}}
 \newcommand{\Yakindu}{\textsf{Yakindu}}
 
+\newcommand{\specialcell}[2][c]{%
+	\begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+
+\newenvironment*{mytable}[3]{
+	% #1: caption, #2: cimke, #3: oszlopdef		 
+	\begin{table}[htbp]	
+		\caption{#1}          
+		\label{tab:#2}            
+		\center%
+		\begin{tabular}{#3}
+		}
+		{
+		\end{tabular}
+	\end{table}
+}
+
+% Define Language
+\lstdefinelanguage{Gamma}
+{
+	% list of keywords
+	morekeywords={
+		const,
+		integer, 
+		natural,
+		interface,
+		extends,
+		in,
+		out,
+		inout,
+		event,
+		import,
+		package,
+		statechart,
+		rate,
+		var,
+		transition,
+		from,
+		to,
+		region,
+		initial,
+		shallow,
+		deep,
+		history,
+		state,
+		entry,
+		exit,
+		assign,		
+		sync,
+		cascade,
+		async, 
+		of,
+		port,
+		provides,
+		requires,
+		component,
+		bind,
+		->,
+		channel,
+		-o)-,
+		any,
+		run,
+		full,
+		step,
+		reset,
+		priority,
+		capacity,
+		clock,
+		s,
+		ms,
+		when,
+		queue
+	},
+	sensitive=true, % keywords are not case-sensitive
+	morecomment=[l]{//}, % l is for line comment
+	morecomment=[s]{/*}{*/}, % s is for start and end delimiter
+	morestring=[b]" % defines that strings are enclosed in double quotes
+}
+
+% Define Colors
+\usepackage{color}
+\definecolor{eclipseBlue}{RGB}{42,0.0,255}
+\definecolor{eclipseGreen}{RGB}{63,127,95}
+\definecolor{eclipsePurple}{RGB}{127,0,85}
+
+\definecolor{lightgray}{rgb}{0.95,0.95,0.95}
+\lstset{
+	basicstyle=\footnotesize, % print whole listing small
+	keywordstyle=\color{black}\bfseries, % bold black keywords
+	identifierstyle=, % nothing happens
+	% default behavior: comments in italic, to change use
+	% commentstyle=\color{green}, % for e.g. green comments
+	stringstyle=\scriptsize,
+	showstringspaces=false, % no special string spaces
+	backgroundcolor = \color{white},
+	aboveskip=1.5\medskipamount,	
+	columns=flexible,
+	keepspaces=true,
+	escapeinside={(*@}{@*)},
+	captionpos=b,
+	breaklines=true,
+	frame=single,
+	float=!ht,
+	literate=*
+	{á}{{\'a}}1	{é}{{\'e}}1	{í}{{\'i}}1	{ó}{{\'o}}1	{ö}{{\"o}}1	{ő}{{\H{o}}}1	{ú}{{\'u}}1	{ü}{{\"u}}1	{ű}{{\H{u}}}1
+	{Á}{{\'A}}1	{É}{{\'E}}1	{Í}{{\'I}}1	{Ó}{{\'O}}1	{Ö}{{\"O}}1	{Ő}{{\H{O}}}1	{Ú}{{\'U}}1	{Ü}{{\"U}}1	{Ű}{{\H{U}}}1
+}
+
+
+% Set Language
+\newcommand{\setGammaSyntax}{
+	\lstset {
+		language={Gamma},
+		basicstyle=\footnotesize, % Global Code Style
+		captionpos=b, % Position of the Caption (t for top, b for bottom)
+		extendedchars=true, % Allows 256 instead of 128 ASCII characters
+		tabsize=2, % number of spaces indented when discovering a tab 
+		columns=fixed, % make all characters equal width
+		keepspaces=true, % does not ignore spaces to fit width, convert tabs to spaces
+		showstringspaces=false, % lets spaces in strings appear as real spaces
+		breaklines=true, % wrap lines if they don't fit
+		frame=trbl, % draw a frame at the top, right, left and bottom of the listing
+		frameround=tttt, % make the frame round at all four corners
+		framesep=4pt, % quarter circle size of the round corners
+		%		numbers=left, % show line numbers at the left
+		%		numberstyle=\tiny\ttfamily, % style of the line numbers
+		commentstyle=\color{eclipseGreen}, % style of comments
+		keywordstyle=\color{black}\bfseries, % style of keywords
+		stringstyle=\color{eclipseBlue}, % style of strings
+	}
+}
+
 \begin{document}
-
+\setGammaSyntax
 \title{The Composition Language of the \\ Gamma Framework}
-
 
 % author names and affiliations
 % use a multiple column layout for up to three different
@@ -64,8 +196,6 @@ Email: \texttt{bence.graics@gmail.com},  \texttt{molnarv@mit.bme.hu}}
 
 Statecharts \cite{Harel:1987:SVF:34884.34886} are a popular formalism to describe the behavior of reactive systems, which process stimuli from the environment and react with respect to their internal states. Statecharts introduce complex elements to aid the modeling of such systems, e.g., variables, hierarchical state refinement, history states and complex transitions (e.g., inner transitions).
 
-%Statechart \cite{Harel:1987:SVF:34884.34886} is a widely used formalism to design complex and hierarchical reactive systems. Among the many statechart tools, our work is based on the open-source \Yakindu\footnote{https://itemis.com/en/yakindu/statechart-tools/}, which supports the development of complex hierarchical statecharts with a graphical editor, validation and simulation features. \Yakindu\ also supports source code-generation from statecharts to various languages (Java, C, C++).
-%
 The requirements such systems have to meet are getting more complex, which can result in unmanageably large system models encumbering verifiability, maintenance and extensibility. As an alternative, models could be created as the composition of smaller interacting components,  which collectively define the behavior of the system. There are several modeling tools that aim to support this practice.
 
 
@@ -84,61 +214,126 @@ statechart diagrams with flowchart diagrams and providing various scheduling
 algorithms. Furthermore, Stateflow supports the simulation, validation and verification of created models as well as source code generation. Stateflow is a mature software with professional
 support. Unfortunately, as Stateflow is a commercial product, its study and extension is cumbersome, which is not favorable in research context. Also, commercial licenses are expensive.
 
+In this paper we propose the \framework\footnote{The gamma framework along with a tutorial is available under https://gamma.mit.bme.hu/.}, which is a modeling framework to design and analyze hierarchical, component-based, reactive systems. \Gamma\ aims to draw inspiration from the aforementioned composition tools while adressing some of their limitations. In \gamma\ the modeling of reactive components is based on the \gamma\ statechart language. Furthermore, the framework supports the hierarchical composition of statechart components with three kinds of semantics:
+\emph{asynchronous-reactive} semantics for the abstraction of distributed communication,
+\emph{synchronous-reactive} for components of a single program or for highly synchronous
+communication, and \emph{cascade} for the logical decomposition of a single function.
 
-%
-%SysML \cite{OMGSysML,Delligatti:2013:SDB:2560076} tools have a large set of modeling elements which enables their users to express their thoughts and ideas as freely and concisely as possible. On the other hand, they rarely define precise semantics, which encumbers code generation and analysis. BIP \cite{Basu:2006:MHR:1158333.1158344,konnov_et_al:LIPIcs:2016:6167,Bozga:2009:MSS:1629335.1629347} is a compositional tool with well-defined semantics that supports the formal verification of modeled systems. Source code generation is also possible with this tool. Scade\footnote{http://www.esterel-technologies.com/products/scade-suite/} \cite{bghm14,venky_08_statemate} is a tool that unifies the advantages of design and analysis tools. It supports the generation of source code as well as the formal verification of the modeled system. It is a commercial tool and does not support extensibility.
-%Matlab Stateflow \cite{Chen2016} is an environment for modeling and simulating decision logic using statecharts and flow charts. It is a leading tool for composing state-based models in the domain of safety-critical embedded systems. It supports the encapsulation of state-based logics which can be reused throughout different models and diagrams.
-%
-%Unfortunately, \Yakindu\ does not support composition features. The main goal of our work is to create a tool that enables the users to compose individual statechart components into a single composite system by constructing connections through ports. The ultimate goal of this work is to enable code generation and formal verification of composite models with model transformations based on the proposed semantics.
-%
-%We will call this type of composition an event-based automata network, as opposed to dataflow networks, which can be considered message-based automata networks in this sense. In event-based automata networks, data is only of secondary importance -- the occurrence of the event is in focus. In message-based settings, data is more significant, thus message queues are desirable to buffer the simultaneous messages.
-%
-%This paper is structured as follows. Section \ref{sec:yakindu_semantics} presents the semantics of \Yakindu\ statecharts serving as the basis of the compositional language. The syntax and semantics of the compositional language along with an example are introduced in Section \ref{sec:compositional_language}. Finally, Section \ref{sec:conclusion} provides concluding remarks and ideas for future work.
+The rest of the paper is structured as follows. Section \ref{sec:statechart-language} presents the \gamma\ statechart language, which serves as the basis of the composition language. The elements of a the \gamma\ composition language and an example are introduced in Section \ref{sec:composition-language}. Finally, Section \ref{sec:conclusion} provides concluding remarks and ideas for future work.
 
-%\begin{figure*}[!t]
-%	\centering
-%	\includegraphics[width=0.85\textwidth]{figures/metamodel_cropped2}%	
-%	\caption{Metamodel of the compositional language.}
-%	\label{fig:metamodel}
-%\end{figure*}
+\section{The Gamma Statechart Language}
+\label{sec:statechart-language}
+The goal of the \gamma\ statechart language is to support the rigorous design of reactive
+systems while providing conventional facilities of modern statechart languages. To support
+strictness, a well-defined semantics is needed. The language is given a denotational semantics
+described in \cite{graics-bence-bsc} by mapping gamma model constructions to the elements of a formal timed
+automaton implementation. The most important elements of the language are presented in this section using a simple \emph{timer} statechart capable of measuring time.
 
-%\section{Abstracting Yakindu Statecharts}
-%\label{sec:yakindu_semantics}
-%\Yakindu\ adopts a statechart formalism which is the extension of the well-known state machine formalism. Statecharts support the definition of auxiliary variables as well as concurrency and state refinement. This section introduces a syntactical abstraction of \Yakindu, i.e.~the actual model elements are ignored. We deal only with the input and output events in addition to the actual state configuration, but not the semantics. This way we can generalize the composition of abstract models with minimal restrictions to the usable formalisms. In this approach, a \Yakindu\ statechart is considered a 5-tuple: $\mathbb{S} = \langle I, O, S, s_0, T \rangle$ where:
-%\begin{itemize}
-%	
-%	\item $I$ is a finite set of input events (from the environment)
-%	
-%	\item $O$ is a finite set of output events (for the environment)
-%	
-%%	\item $E = I \cup O$ is the union of input and output events
-%	
-%%	\item $V = \{void, boolean, integer, real, string\}$ is the supported parameter types of events
-%%	
-%%	\item $W\colon E \rightarrow V$ assigns a type to each event
-%%	
-%	%\item $V$ is a finite set of boolean, integer, real and string variables (MI LEGYEN A SOKFÉLE TÍPUSSAL?)
-%	
-%	%\item $W\colon V \rightarrow \{0, 1, \cdots\}$ assigns values to the variables (ITT NEM CSAK INTEGER KÉNE)
-%	
-%	\item $S = \{s_1, s_2, \cdots , s_n\}$ is a finite set of states, including a state configuration and values of variables
-%	
-%	%\item $\Omega \subseteq S \times \{W\}$ is a finite set of statechart states, i.e.~a state configuration and values assigned to the variables
-%	
-%	\item $s_0 \in S$ is the initial state	
-%	
-%	\item $T \subseteq (2^I \times S) \times (S \times 2^O) $ is a finite set of transitions, that represent changes of state in response to a set of input events and generate a set of output events
-%\end{itemize}
-%
-% \Yakindu\ statecharts adopt a turn-based semantics. 
-% The following paragraphs introduce the interpretation of \emph{turns} as well as how the raising of events is associated to them.
-% 
-% Events represent signal receptions. There are two types of events: \emph{simple} or \emph{void} events and \emph{parameterized} or \emph{typed} events. The latter enables the modeling of parameterized signals, which can describe additional details. Note that multiple input events can be raised in a single turn according to the abstract formalism defined above. In \Yakindu\ the raising of events is interpreted as setting a boolean flag to true. \Yakindu\ therefore does not support message queues. Owing to this semantics raising the same \emph{simple} event in a particular turn once or several times has the same effect. On the other hand, \emph{parameterized} events are defined by their parameter as well, so a new event raising with a different parameter overwrites the former one. Although this behavior is an essential part of the semantics of \Yakindu, it is not relevant either in the abstract formalism presented above or the semantics of the composition language defined in Section \ref{sec:semantics}.
-%
-% All turns consist of two distinct sections, a \emph{raising} section and a \emph{running} section. In the raising section input events of the statechart are raised as presented in the previous paragraph. This is followed by the running section where a new stable state of the statechart is defined. It starts with the examination of the transitions going out of the particular state configuration. The goal is to specify the firing transition. At this point a \emph{race condition} might exist if multiple outgoing transitions are enabled, e.g.~more of them are triggered by raised input events. \Yakindu\ intends to solve ambiguity by introducing the concept of \emph{transition priority}: users can specify which of the outgoing transitions of a state should be fired in case of a race condition by defining a total ordering of the transitions. The firing transition specifies the next stable state of the statechart, including the state configuration, values of variables and events for the environment.
- 
- %In our work we defined statechart validation rules in order to support validation at an early stage of statechart design. We put emphasis on finding possible race conditions, thus prompting the users not to rely on transition priority. Additionally, the rules check unreferred variables and events, transitions occluded by transitions of parent states,  transitions connecting nodes of parallel regions and race conditions in parallel regions. Practically, the goal of these constraints is facilitating the design of well-formed statecharts whose composition and emergent behavior is deterministic and analyzable. 
+The execution of the statechart starts in the \textsl{Idle} state, with the \textsl{elapsedTime} variable set to $-1$. When a \textsl{start} event is received on its \textsl{control} port, it changes its state to \textsl{Measuring}, where the incoming \textsl{tick} events are counted using a loop transition. When a \textsl{stop} event is received, the statechart goes back to state \textsl{Idle} while storing the elapsed number of ticks in variable \textsl{elapsedTime}. The measuring process can be restarted with an additional \textsl{start} event.
+\begin{lstlisting}
+statechart Timer [
+  // Port for communication
+  port control : provides Control
+] {
+  var elapsedTime : integer := -1
+  // Transition without trigger
+  transition from Initial to Idle 
+  // Transitions with triggers
+  transition from Idle to Measuring
+    when control.start / assign elapsedTime := -1
+  transition from Measuring to Measuring
+    when control.tick && !(control.stop)
+  transition from Measuring to Idle
+    when control.stop
+  // Main region
+  region main {
+    // Initial state
+    initial Initial
+    // Simple state
+    state Idle
+    // Simple state with entry action
+    state Measuring {
+      entry / assign elapsedTime := elapsedTime + 1
+    }		
+  }
+}
+\end{lstlisting}
 
+Statecharts communicate with their environment via \textsl{ports} using \textsl{events}. A port realizes an \textsl{interface} in either required or provided mode, which determines the event types that can be dispatched or received through the particular port. The language supports the definition of \textsl{variables} with the following types: integer, natural, real, boolean and enumeration types. Variables can be used in guard expressions and assignment expressions of \textsl{transitions}. Events of ports can also be raised by transitions.
+
+One of the unique features of the \gamma\ statechart language is the \textsl{complex trigger}. A complex trigger, consisting of simple triggers, can describe the relation
+of multiple triggers as logical relations. A complex trigger may initiate a particular execution only if the corresponding logical relation is evaluated to true. Furthermore, an execution can be
+initiated on the absence of a certain event.
+
+\textsl{Region} is the container element of node elements. A region can either be a top region, contained by a statechart or a subregion,
+contained by a composite state. A region must contain a single entry state, which can be an \textsl{initial state} (no history), a \textsl{shallow history} or \textsl{deep history state}. \textsl{States} can have \textsl{entry} and
+\textsl{exit events}, which specify different actions that have to be taken when the state is activated
+or deactivated, respectively. \textsl{Composite states} extend simple states with the ability of containing
+one ore more regions. If a particular state contains multiple regions, they are parallel.
+
+\section{The Gamma Composition Language}
+\label{sec:composition-language}
+
+\subsection{Summary}
+As a summary, Table \ref{tab:supported-component-types} describes the component types that are supported by the \gamma\ composition language in terms of \emph{synchronousness} and \emph{compositeness}.
+
+\begin{mytable}{Component types supported by the \gamma\ composition language.}{supported-component-types}{|c||c|c|}
+	\hline
+	& \textbf{Atomic} & \textbf{Composite} \\ \hline \hline
+	%	1 & Equality & equal & equality & Right-to-left  \\ \hline
+	\textbf{Synchronous} & Statechart & \specialcell{Synchronous composite component \\ Cascade composite component}\\ \hline
+	\textbf{Asynchronous} & Synchronous component wrapper & \specialcell{Asynchronous composite component}\\ \hline
+\end{mytable}
+
+Figure \ref{fig:gamma-object-tree} presents the containment hierarchy of an example composite model. Note that the synchronous and asynchronous domain can be bridged only by synchronous composite wrappers. Furthermore, the leaves, which generally define the behavior of composite components, are always statechart definitions.
+
+\begin{figure}[htbp]
+	\center
+	%	\resizebox{140mm}{!}{
+	\includegraphics[width=1.0\linewidth]{figures/gamma_object_tree.pdf}
+	%	}
+	\caption{A composite model hierarchy in \gamma.}
+	\label{fig:gamma-object-tree}
+\end{figure}
+
+\subsection{Example}
+
+\begin{lstlisting}
+import trafficLight
+import controller
+
+sync Crossroad [
+  // External ports of the composite model
+  port police : requires PoliceInterrupt,
+  port priorityLightOutput : provides LightCommands,
+  port secondaryLightOutput : provides LightCommands
+] {
+  // Component instances
+  component controller : Controller
+  component priorityLight : TrafficLight
+  component secondaryLight : TrafficLight
+  // Bindings connecting system ports to internal ports
+  bind police -> controller.policeInterrupt
+  bind priorityLightOutput -> priorityLight.lightCommands
+  bind secondaryLightOutput -> secondaryLight.lightCommands
+  // Channel definitions connecting internal ports
+  channel [controller.priorityControl] -o)- [priorityLight.control]
+  channel [controller.secondaryControl] -o)- [secondaryLight.control]
+
+  channel [controller.priorityPolice] -o)- [priorityLight.policeInterrupt]
+  channel [controller.secondaryPolice] -o)- [secondaryLight.policeInterrupt]
+}
+\end{lstlisting}
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[width=0.52\textwidth]{figures/Controller-gcd.pdf}
+	\caption{The synchronous Crossroad composite model composing a Controller and two Traffic light statecharts.}
+	\label{fig:block_diagram_cropped2}
+\end{figure}
+
+\section{Conclusion and Future Work}
+\label{sec:conclusion}
 
 %\section{Language for Composition}
 %\label{sec:compositional_language}
@@ -391,9 +586,6 @@ support. Unfortunately, as Stateflow is a commercial product, its study and exte
 % footnotes above bottom floats. This can be corrected via the
 % \fnbelowfloat command of the stfloats package.
 
-
-
-
 % conference papers do not normally have an appendix
 
 
@@ -404,10 +596,6 @@ support. Unfortunately, as Stateflow is a commercial product, its study and exte
 	\includegraphics[width=0.12\textwidth]{figures/unkp_logo.jpg}
 \end{figure}
 Supported by the ÚNKP-17-2-I New National Excellence Program of the Ministry of Human Capacities.
-
-
-
-
 
 % trigger a \newpage just before the given reference
 % number - used to balance the columns on the last page
