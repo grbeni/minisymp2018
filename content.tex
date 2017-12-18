@@ -30,7 +30,7 @@ The Gamma Statechart Composition Framework is one such tool, providing a layer f
 	
 \textbf{Cascade:} Cascade models represent a set of filters that are applied sequentially to derive an output from an input. Like synchronous-reactive components, cascade components also facilitate the logical decomposition of a problem, but it focuses more heavily on process-like models. Therefore, this model supports the design of adapters, runtime monitors and units with a batch-like execution.
 
-The rest of the paper is structured as follows. \textbf{TODO: szerintem ez nem k\'ene} Section \ref{sec:statechart-language} presents the \gamma\ statechart language, which serves as the basis of the composition language. Section~\ref{sec:related-tools} presents a short summary of tools that inspired the design of the composition language. The elements of a the language itself and an example are introduced in Section \ref{sec:composition-language}. Finally, Section \ref{sec:conclusion} provides concluding remarks and ideas for future work.
+The rest of the paper is structured as follows. Section~\ref{sec:related-tools} presents a short summary of tools that inspired the design of the composition language. The elements of a the language itself and an example are introduced in Section \ref{sec:composition-language}. Finally, Section \ref{sec:conclusion} provides concluding remarks and ideas for future work.
 
 \section{Related Tools}
 \label{sec:related-tools}
@@ -103,6 +103,50 @@ support. Unfortunately, as Stateflow is a commercial product, its study and exte
 
 \section{The Gamma Composition Language}
 \label{sec:composition-language}
+The gamma composition language supports the definition of communicating composite models
+built from individual reactive components. The design of composite systems starts with the definition of interfaces, which define the possible event types that can be transmitted between components. The interfaces then can be realized by ports of components, which can be connected, thus enabling communication. Communicating components can be wrapped by composite models, creating an independent composite reactive unit with rigorously defined interaction patterns.
+
+\subsection{Communication Elements}
+Interfaces serve as contracts between
+interacting components of \gamma\ models. These contracts apply to the ability of dispatching
+and receiving certain events. Events represent occurrences of some importance. Directions of events can be in, out or in-out;
+the latter represents events that can be used as both in and out events. Events can contain
+parameter declarations, which provide additional information about the corresponding event. An example interface definition can be seen below.
+\begin{lstlisting}
+interface LightCommands {
+  out event displayRed
+  out event displayGreen
+  out event di splayYe l low
+  out event displayNone
+}
+interface PoliceInterrupt {
+  out event police
+}
+\end{lstlisting}
+
+Ports serve as endpoints of component instances in a composite component model,
+through which events can be dispatched or received. In \gamma\ models, communication between component
+instances always happens through ports. Events are either called signals in case of
+synchronous components or messages in case of asynchronous components. Each port realizes
+a single interface in either provided or required mode. In provided mode ports dispatch and receive events according to the direction specified in the event declarations. In case of required mode, interfaces are ``turned inside out'', i.e., events declared with the direction in will be
+dispatched, and events declared with the direction out will be received through such ports. Note that if two ports realize the same interface, one of them in provided mode, the other
+one in required mode, they can be connected since the direction of the events would match. Note that
+the realization mode does not specify a single direction in which events are transmitted
+through the particular port – dispatch and reception can be mixed in both cases. A port is considered as a broadcast port if the interface realization mode is provided and
+the realized interface contains only out events. Unlike other ports, a broadcast port can
+be connected to multiple ports realizing the same interface in required mode.
+
+The concept of ports realizing interfaces in providing or requiring modes may be unusual to
+some designers, since ports usually support one-way event transmission in modern modeling
+languages. Our goal with this solution is to investigate the possibilities residing in interface-based
+communication in the domain of reactive systems. On the other hand, it is possible to
+use only out events on every interface -- then provided mode is ``output'' mode and required
+mode is ``input'' mode.
+
+
+\subsection{Components}
+
+\subsection{Composite Models}
 
 \subsection{Summary}
 As a summary, Table \ref{tab:supported-component-types} describes the component types that are supported by the \gamma\ composition language in terms of \emph{synchronousness} and \emph{compositeness}.
@@ -142,7 +186,7 @@ sync Crossroad [
   component controller : Controller
   component priorityLight : TrafficLight
   component secondaryLight : TrafficLight
-  // Bindings connecting system ports to internal ports
+  // Bindings of system ports to internal ports
   bind police -> controller.policeInterrupt
   bind priorityLightOutput -> priorityLight.lightCommands
   bind secondaryLightOutput -> secondaryLight.lightCommands
