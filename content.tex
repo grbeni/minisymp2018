@@ -202,19 +202,67 @@ channel [controller.secondaryControl] -o)-
 \end{lstlisting}
 
 \subsection{Composite Component Variations}
+Composite components can be classified into \emph{synchronous} and \emph{asynchronous components} regarding their execution semantics.
 
+\subsubsection{Synchronous Components}
+Synchronous components represent models that communicate
+in a synchronous manner using \emph{signals}. Synchronous components do not run independently, but their
+execution is scheduled by a scheduler, e.g., a wrapping asynchronous component. When executed, synchronous components process incoming signals
+and produce output signals in accordance with their internal states. Output signals are
+produced for a single execution period only, i.e., another execution might produce different
+output signals overwriting the output signals of the previous one. Synchronous components in \gamma\ are the followings:  statechart definitions, synchronous composite
+components and cascade composite components.
+\paragraph{Synchronous composite component} The execution of a synchronous composite component
+conforms to a turn-based semantic. A turn is called a \emph{cycle}. In each cycle all component instances of the particular composite component are executed. Although the order of the execution of the component instances is not defined, it is fixed, therefore they are executed in the same order in each cycle. This does not cause a loss of generality, as components cannot affect each other in a single execution cycle: if a component instance produces a signal that another component instance receives, the receiver will get it in the next cycle. If a single component instance is executed it may \textit{1)} process all signals received in the last execution turn, \textit{2)} assume a new state according to the processed signals (new state configuration, new variable values) and \textit{3)} produce signals that can be received by components (others or itself).
+
+\paragraph{Cascade composite component} Cascade composite components contain the same elements
+as synchronous composite components, but their execution semantics is different. The
+execution of a cascade composite component also consist of cycles. In a single cycle all components
+of the particular composite component are executed according to a topological ordering
+based on channels. If a component is executed, it processes all incoming signals and produces
+signals in accordance with its internal state. However, the signals are processed in the same
+execution cycle by receivers, and not in the next one as it is specified in synchronous composite
+components. Therefore, in cascade composite components the flow of signals is one-way:
+component instances earlier in the ordering transmit signals to the ones that are later, in
+accordance with channel definitions. This structure ensures that a component can process all
+signals it receives in a single cycle.
+\subsubsection{Asynchronous Components}
+Asynchronous components represent independently running
+component instances. There is no guarantee on the running time or the running frequency of such components. Asynchronous components communicate with each other via ports using buffered \emph{messages}. There are two types of asynchronous components in \gamma: asynchronous composite component and synchronous component wrapper.
+\paragraph{Synchronous component wrapper} A synchronous component wrapper wraps a single synchronous component, turning it into an asynchronous component. In addition to the ports of the wrapped component synchronous component wrappers have ports that are generally used for the reception of control messages. Furthermore, a synchronous component wrapper has one or more
+message queues, which store the incoming messages of the component. A message queue has multiple attributes:
+\begin{itemize}
+	\item Capacity specifies the maximum number of messages that can be stored in the particular
+	queue.
+	\item Priority specifies the order in which the contents of message queues are retrieved during
+	the execution of the asynchronous component. A message is always retrieved from a
+	non-empty queue with the highest priority. Priority values can be any integers.
+	\item Event references specify the types of messages that can be stored in the particular message queue.
+\end{itemize}
+
+During execution, messages are retrieved individually from messages queues. A message
+is always taken from the highest priority non-empty queue. If the particular message was
+received on a port that is implicitly derived from the wrapped component, the message is
+converted to a signal (as synchronous components communicate with signals) and transmitted
+to the wrapped synchronous component (potentially overwriting previously sent signals). If
+it was received on a port explicitly defined on the wrapper component, the message does not
+get transmitted.
+A synchronous component wrapper also has one or more control specifications, which
+specify the message types that are able to trigger the execution of the particular component.
+If a message with a specified type arrives to the wrapper component, the wrapped synchronous
+component may be executed in one of the following ways:
+\begin{itemize}
+	\item Run once: the wrapped component executes a single cycle.
+	\item Run to completion: the wrapped component executes as many cycles as needed to
+	ensure all inner signals are processed and no additional steps could be taken.
+	\item Reset: the wrapper component gets into its initial state.
+\end{itemize}
+
+Furthermore, synchronous component wrappers can contain zero or more clocks, which emit tick
+events at defined timed intervals. Such time intervals can be defined with attribute rate.
+Currently, seconds and milliseconds are supported as unit of measurements.
 \subsection{Summary}
-As a summary, Table \ref{tab:supported-component-types} describes the component types that are supported by the \gamma\ composition language in terms of \emph{synchronousness} and \emph{compositeness}.
-
-\begin{mytable}{Component types supported by the \gamma\ composition language.}{supported-component-types}{|c||c|c|}
-	\hline
-	& \textbf{Atomic} & \textbf{Composite} \\ \hline \hline
-	%	1 & Equality & equal & equality & Right-to-left  \\ \hline
-	\textbf{Synchronous} & Statechart & \specialcell{Synchronous composite component \\ Cascade composite component}\\ \hline
-	\textbf{Asynchronous} & Synchronous component wrapper & \specialcell{Asynchronous composite component}\\ \hline
-\end{mytable}
-
-Figure \ref{fig:gamma-object-tree} presents the containment hierarchy of an example composite model. Note that the synchronous and asynchronous domain can be bridged only by synchronous composite wrappers. Furthermore, the leaves, which generally define the behavior of composite components, are always statechart definitions.
+As a summary, Figure \ref{fig:gamma-object-tree} presents the containment hierarchy of an example composite model. Note that the synchronous and asynchronous domain can be bridged only by synchronous composite wrappers. Furthermore, the leaves, which generally define the behavior of composite components, are always statechart definitions.
 
 \begin{figure}[htbp]
 	\center
