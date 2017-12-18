@@ -15,6 +15,7 @@ bare_conf.pdf
 # *.ps
 # *.eps
 # *.pdf
+minisy2018.pdf
 
 ## Bibliography auxiliary files (bibtex/biblatex/biber):
 *.bbl

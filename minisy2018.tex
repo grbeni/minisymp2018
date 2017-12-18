@@ -1,0 +1,218 @@
+% !TeX spellcheck = en_US
+\documentclass[conference]{IEEEtran}
+
+% *** GRAPHICS RELATED PACKAGES ***
+%
+\usepackage[pdftex]{graphicx}
+% declare the path(s) where your graphic files are
+\graphicspath{{./figures/}}
+% and their extensions so you won't have to specify these with
+% every instance of \includegraphics
+\DeclareGraphicsExtensions{.pdf,.jpeg,.png}
+
+% *** MATH PACKAGES ***
+%
+\usepackage{amsfonts,amsmath,amssymb} % Mathematical symbols.
+
+% correct bad hyphenation here
+\usepackage{listings}
+\usepackage{cite}
+%\usepackage{caption}
+\hyphenation{UPPAAL}
+
+\usepackage{url}
+
+\newcommand{\framework}[0]{\text{Gamma Framework}}
+\newcommand{\Framework}[0]{\text{Gamma Framework}}
+\renewcommand{\gamma}[0]{\text{Gamma}}
+\renewcommand{\Gamma}[0]{\text{Gamma}}
+\newcommand{\Yakindu}{\textsf{Yakindu}}
+
+\newcommand{\eg}{e.g., }
+\newcommand{\ie}{i.e., }
+
+\newcommand{\RNum}[1]{\uppercase\expandafter{\romannumeral #1\relax}}
+\newcommand{\ptolemy}{Ptolemy \RNum{2}}
+
+\newcommand{\specialcell}[2][c]{%
+	\begin{tabular}[#1]{@{}c@{}}#2\end{tabular}}
+
+\newenvironment*{mytable}[3]{
+	% #1: caption, #2: cimke, #3: oszlopdef		 
+	\begin{table}[htbp]	
+		\caption{#1}          
+		\label{tab:#2}            
+		\center%
+		\begin{tabular}{#3}
+		}
+		{
+		\end{tabular}
+	\end{table}
+}
+
+% Define Language
+\lstdefinelanguage{Gamma}
+{
+	% list of keywords
+	morekeywords={
+		const,
+		integer, 
+		natural,
+		interface,
+		extends,
+		in,
+		out,
+		inout,
+		event,
+		import,
+		package,
+		statechart,
+		rate,
+		var,
+		transition,
+		from,
+		to,
+		region,
+		initial,
+		shallow,
+		deep,
+		history,
+		state,
+		entry,
+		exit,
+		assign,		
+		sync,
+		cascade,
+		async, 
+		of,
+		port,
+		provides,
+		requires,
+		component,
+		bind,
+		->,
+		channel,
+		-o)-,
+		any,
+		run,
+		full,
+		step,
+		reset,
+		priority,
+		capacity,
+		clock,
+		s,
+		ms,
+		when,
+		queue
+	},
+	sensitive=true, % keywords are not case-sensitive
+	morecomment=[l]{//}, % l is for line comment
+	morecomment=[s]{/*}{*/}, % s is for start and end delimiter
+	morestring=[b]" % defines that strings are enclosed in double quotes
+}
+
+% Define Colors
+\usepackage{color}
+\definecolor{eclipseBlue}{RGB}{42,0.0,255}
+\definecolor{eclipseGreen}{RGB}{63,127,95}
+\definecolor{eclipsePurple}{RGB}{127,0,85}
+
+\definecolor{lightgray}{rgb}{0.95,0.95,0.95}
+\lstset{
+	basicstyle=\footnotesize, % print whole listing small
+	keywordstyle=\color{black}\bfseries, % bold black keywords
+	identifierstyle=, % nothing happens
+	% default behavior: comments in italic, to change use
+	% commentstyle=\color{green}, % for e.g. green comments
+	stringstyle=\scriptsize,
+	showstringspaces=false, % no special string spaces
+	backgroundcolor = \color{white},
+	aboveskip=1.5\medskipamount,	
+	columns=flexible,
+	keepspaces=true,
+	escapeinside={(*@}{@*)},
+	captionpos=b,
+	breaklines=true,
+	frame=single,
+	float=!ht,
+	literate=*
+	{á}{{\'a}}1	{é}{{\'e}}1	{í}{{\'i}}1	{ó}{{\'o}}1	{ö}{{\"o}}1	{ő}{{\H{o}}}1	{ú}{{\'u}}1	{ü}{{\"u}}1	{ű}{{\H{u}}}1
+	{Á}{{\'A}}1	{É}{{\'E}}1	{Í}{{\'I}}1	{Ó}{{\'O}}1	{Ö}{{\"O}}1	{Ő}{{\H{O}}}1	{Ú}{{\'U}}1	{Ü}{{\"U}}1	{Ű}{{\H{U}}}1
+}
+
+
+% Set Language
+\newcommand{\setGammaSyntax}{
+	\lstset {
+		language={Gamma},
+		basicstyle=\footnotesize, % Global Code Style
+		captionpos=b, % Position of the Caption (t for top, b for bottom)
+		extendedchars=true, % Allows 256 instead of 128 ASCII characters
+		tabsize=2, % number of spaces indented when discovering a tab 
+		columns=fixed, % make all characters equal width
+		keepspaces=true, % does not ignore spaces to fit width, convert tabs to spaces
+		showstringspaces=false, % lets spaces in strings appear as real spaces
+		breaklines=true, % wrap lines if they don't fit
+		frame=trbl, % draw a frame at the top, right, left and bottom of the listing
+		frameround=tttt, % make the frame round at all four corners
+		framesep=4pt, % quarter circle size of the round corners
+		%		numbers=left, % show line numbers at the left
+		%		numberstyle=\tiny\ttfamily, % style of the line numbers
+		commentstyle=\color{eclipseGreen}, % style of comments
+		keywordstyle=\color{black}\bfseries, % style of keywords
+		stringstyle=\color{eclipseBlue}, % style of strings
+	}
+}
+
+\begin{document}
+\setGammaSyntax
+\title{The Composition Language of the \\ Gamma Framework}
+
+% author names and affiliations
+% use a multiple column layout for up to three different
+% affiliations
+\author{\IEEEauthorblockN{Bence Graics, Vince Moln\'ar}
+\IEEEauthorblockA{Budapest University of Technology and Economics, \\
+Department of Measurement and Information Systems \\
+Budapest, Hungary \\
+Email: \texttt{bence.graics@gmail.com},  \texttt{molnarv@mit.bme.hu}}
+
+}
+
+% make the title area
+\maketitle
+
+\input{content}
+
+
+% trigger a \newpage just before the given reference
+% number - used to balance the columns on the last page
+% adjust value as needed - may need to be readjusted if
+% the document is modified later
+%\IEEEtriggeratref{8}
+% The "triggered" command can be changed if desired:
+%\IEEEtriggercmd{\enlargethispage{-5in}}
+
+% references section
+
+% can use a bibliography generated by BibTeX as a .bbl file
+% BibTeX documentation can be easily obtained at:
+% http://mirror.ctan.org/biblio/bibtex/contrib/doc/
+% The IEEEtran BibTeX style support page is at:
+% http://www.michaelshell.org/tex/ieeetran/bibtex/
+%\bibliographystyle{IEEEtran}
+% argument is your BibTeX string definitions and bibliography database(s)
+%\bibliography{IEEEabrv,../bib/paper}
+%
+% <OR> manually copy in the resultant .bbl file
+% set second argument of \begin to the number of references
+% (used to reserve space for the reference number labels box)
+\bibliographystyle{IEEEtran}
+\bibliography{IEEEabrv,./bib}
+
+
+% that's all folks
+\end{document}
+
+
