@@ -17,7 +17,7 @@
 \IEEEpeerreviewmaketitle
 
 \section{Introduction}
-
+\label{sec:introduction}
 Statecharts \cite{Harel:1987:SVF:34884.34886} are a popular formalism to describe the behavior of reactive systems, which process stimuli from the environment and react with respect to their internal states. Statecharts introduce complex elements to aid the modeling of such systems, e.g., variables, hierarchical state refinement, history states and complex transitions (e.g., inner transitions).
 
 The requirements such systems have to meet are getting more complex, which can result in very large system models, encumbering verifiability, maintenance and extensibility. A well-known solution for managing complexity is decomposition. In case of statecharts, one way of decomposition is to define individual reactive components that, by means of some communication, realize a more complex behavior. There are a number of modeling tools that aim to support this practice with various model-driven software development techniques such as code generation and verification.
@@ -103,10 +103,11 @@ support. Unfortunately, as Stateflow is a commercial product, its study and exte
 
 \section{The Gamma Composition Language}
 \label{sec:composition-language}
-The gamma composition language supports the definition of communicating composite models
+The \gamma\ composition language supports the definition of communicating composite models
 built from individual reactive components. The design of composite systems starts with the definition of interfaces, which define the possible event types that can be transmitted between components. The interfaces then can be realized by ports of components, which can be connected, thus enabling communication. Communicating components can be wrapped by composite models, creating an independent composite reactive unit with rigorously defined interaction patterns.
 
 \subsection{Communication Elements}
+\label{sec:communication-elements}
 Interfaces serve as contracts between
 interacting components of \gamma\ models. These contracts apply to the ability of dispatching
 and receiving certain events. Events represent occurrences of some importance. Directions of events can be in, out or in-out;
@@ -116,7 +117,7 @@ parameter declarations, which provide additional information about the correspon
 interface LightCommands {
   out event displayRed
   out event displayGreen
-  out event di splayYe l low
+  out event displayYellow
   out event displayNone
 }
 interface PoliceInterrupt {
@@ -143,10 +144,64 @@ communication in the domain of reactive systems. On the other hand, it is possib
 use only out events on every interface -- then provided mode is ``output'' mode and required
 mode is ``input'' mode.
 
-
 \subsection{Components}
+Components serve as types of component instances in \gamma\ composite models. As introduced in \ref{sec:communication-elements}, each component defines one or more ports through which communication can take place, as presented in the following snippet.
+\begin{lstlisting}
+sync Crossroad [
+  port police : requires PoliceInterrupt,
+  port priorityLightOutput : provides LightCommands,
+  port secondaryLightOutput : provides LightCommands
+]
+\end{lstlisting}
 
-\subsection{Composite Models}
+A component can be either atomic, which wraps a single statechart, or composite, which wraps one or more component instances. Statecharts can be defined using the \gamma\ Statechart Language, presented in \cite{graics-bence-bsc}. Each composite component type -- asynchronous-reactive, synchronous-reactive and cascade -- adopts a rigorous computational semantics. However, they are always based on the same basic modeling elements -- component instances, port bindings and channels -- which can be extended by element set of the particular component type.
+
+Component instances are individual reactive elements with internal state, capable of receiving
+and dispatching events through ports. Each component instance refers to a single
+component, serving as its type, which determines the ports on which
+the component instance shall be able to communicate as well as the internal states it shall
+be able to assume and the transitions it shall be able to fire. Component instances can
+be either atomic or composite. The instance is atomic if the corresponding component is a
+statechart definition and composite if it refers to a composite component. This enables the
+hierarchical composition of \gamma\ models.
+
+\begin{lstlisting}
+// Component instances with atomic component types
+component controller : Controller
+component priorityLight : TrafficLight
+component secondaryLight : TrafficLight
+\end{lstlisting}
+
+Port binding The port binding element is responsible for the connection of the exterior
+ports of a composite component and the ports of constituent component instances. Therefore,
+it refers to a single port of a component instance. Owing to this design, all events received on the particular composite component port will be transmitted to the port of the associated
+component instance, and all the events dispatched through the particular instance port will
+be transmitted to the composite component port.
+
+\begin{lstlisting}
+// Binding component ports to internal ports
+bind police -> controller.policeInterrupt
+bind priorityLightOutput -> priorityLight.lightCommands
+bind secondaryLightOutput -> secondaryLight.lightCommands
+\end{lstlisting}
+
+Channels are responsible for the connection of component instance ports, enabling event flow between ports. There are two types of channels, simple channel and broadcast channel. Simple channels support the connection of a single port providing and a single port
+requiring the same interface. As explained in Section \ref{sec:communication-elements}, this design is valid and safe
+since they handle the same events with appropriate directions. Broadcast channels support sending events to multiple target ports. Such channels refer
+to \textit{1)} a single broadcast port and \text{2)} multiple ports requiring the same interface as the
+one the broadcast port provides. In this case the direction of event transmission is
+determined: the broadcast port dispatches events and all the other ports connected to
+it receive them.
+
+\begin{lstlisting}
+// Channel definitions connecting internal ports
+channel [controller.priorityControl] -o)-
+  [priorityLight.control]
+channel [controller.secondaryControl] -o)-
+  [secondaryLight.control]
+\end{lstlisting}
+
+\subsection{Composite Component Variations}
 
 \subsection{Summary}
 As a summary, Table \ref{tab:supported-component-types} describes the component types that are supported by the \gamma\ composition language in terms of \emph{synchronousness} and \emph{compositeness}.
@@ -186,7 +241,7 @@ sync Crossroad [
   component controller : Controller
   component priorityLight : TrafficLight
   component secondaryLight : TrafficLight
-  // Bindings of system ports to internal ports
+  // Bindings of composite component ports to internal ports
   bind police -> controller.policeInterrupt
   bind priorityLightOutput -> priorityLight.lightCommands
   bind secondaryLightOutput -> secondaryLight.lightCommands
