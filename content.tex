@@ -35,66 +35,71 @@ The rest of the paper is structured as follows. \textbf{TODO: szerintem ez nem k
 \section{Related Tools}
 \label{sec:related-tools}
 
-\ptolemy\footnote{\url{http://ptolemy.eecs.berkeley.edu/}} \cite{ptolemy} is an open-source modeling framework that supports the modeling and simulation of hierarchical composite systems with various component implementations and interaction semantics. Components in \ptolemy\ are based on actors, which are custom programs. Their interaction semantics is defined by \emph{directors} which define a model of computation along different hierarchy levels. The different directors (\eg rendez-vous, synchronous-reactive or discrete events) can be combined on different hierarchy levels, and even more complex behavior can be achieved by the use of \emph{modal models} (where the activation of actors are controlled by a state machine). \ptolemy\ offers simulation capabilities for its rich modeling languages, but its former code generator module has been discontinued and it does not offer formal verification capabilities.
+\ptolemy\footnote{\url{http://ptolemy.eecs.berkeley.edu/}} \cite{ptolemy,ptolemy2} is an open-source software framework, aiming to support
+the modeling of hierarchical composite systems. It supports system design with numerous component variants and communication semantics. Communication semantics of interactive components are determined by \emph{directors}, which are responsible for defining a \emph{model of computation} on a particular hierarchy level. Various directors (e.g., process network, synchronous data flow
+or synchronous reactive) through different hierarchy levels can be combined, facilitating the design of complex model behavior. One of the main strengths of Ptolemy II is the simulation capability of designed models. However, source code generation from models is not supported and it does not provide formal verification capabilities either.
 
-BIP\footnote{\url{http://www-verimag.imag.fr/Rigorous-Design-of-Component-Based.html?lang=en}} \cite{bip2009} (Behavior, Interaction, Priority) is a modeling framework focusing on component interactions. BIP defines a powerful language to define interactions, but contrary to Gamma, these interactions are synchronization-based, coupled with the description of data-flow. BIP offers a rich toolset, containing several transformers for third-party models (\eg MATLAB/Simulink, or AADL), code generators to produce C/C++ or Java code, and supports the formal verification of invariant properties and deadlock-freedom.
+BIP\footnote{\url{http://www-verimag.imag.fr/Rigorous-Design-of-Component-Based.html?lang=en}} \cite{bip,bip3} is a modeling framework that focuses on the formal definition of heterogeneous systems.
+BIP offers a language to define hierarchical composite models, where the interactions of constituent components are based on \emph{synchronization}. BIP defines a clear operational semantics that describes the behavior for both atomic components (transition system model) and compound components (rigorous interaction rules of contained components). BIP offers a comprehensive tool set, which provides model transformers for third-party models, e.g., MATLAB/Simulink, code generators to produce C/C++ code, and formal
+verification capabilities of defined BIP models.
 
-Stateflow\footnote{\url{https://www.mathworks.com/products/stateflow.html}} \cite{stateflow2007} is a commercial framework for the design of reactive (embedded) systems. Stateflow supports the hierarchical modeling of composite statechart systems using various scheduling algorithms, and it can simulate and validate the models and generate source code. Stateflow is a very mature tool with professional support and rich features, but it offers restricted support for 3rd party extensions and commercial licenses are expensive.
+Stateflow\footnote{\url{https://www.mathworks.com/products/stateflow.html}} \cite{stateflow} is a commercial framework that supports the modeling of
+reactive systems. Stateflow supports the design of composite
+statecharts by combining
+statechart diagrams with flowchart diagrams and providing various scheduling
+algorithms. Furthermore, Stateflow supports the simulation, validation and verification of created models as well as source code generation. Stateflow is a mature software with professional
+support. Unfortunately, as Stateflow is a commercial product, its study and extension is cumbersome, which is not favorable in research context. Also, commercial licenses are expensive.
 
-RSARTE\footnote{\url{https://www.ibm.com/support/knowledgecenter/SS5JSH/rsart_family_welcome.html}} is a commercial Eclipse-based modeling framework. Components are called capsules and RSARTE defines the communication among the capsules through ports.
-Composition and hierarchy is provided by using composite structure diagrams, which enables
-the hierarchical refinement of systems. RSARTE generates code from the design models and 
-uses model simulation and Eclipse CDT to test and debug the model and its implementation.
 
-\section{The Gamma Statechart Language}
-\label{sec:statechart-language}
-The goal of the \gamma\ statechart language is to support the rigorous design of reactive
-systems while providing conventional facilities of modern statechart languages. To support
-strictness, a well-defined semantics is needed. The language is given a denotational semantics
-described in \cite{graics-bence-bsc} by mapping gamma model constructions to the elements of a formal timed
-automaton implementation. The most important elements of the language are presented in this section using a simple \emph{timer} statechart capable of measuring time.
-
-The execution of the statechart starts in the \textsl{Idle} state, with the \textsl{elapsedTime} variable set to $-1$. When a \textsl{start} event is received on its \textsl{control} port, it changes its state to \textsl{Measuring}, where the incoming \textsl{tick} events are counted using a loop transition. When a \textsl{stop} event is received, the statechart goes back to state \textsl{Idle} while storing the elapsed number of ticks in variable \textsl{elapsedTime}. The measuring process can be restarted with an additional \textsl{start} event.
-\begin{lstlisting}
-statechart Timer [
-  // Port for communication
-  port control : provides Control
-] {
-  var elapsedTime : integer := -1
-  // Transition without trigger
-  transition from Initial to Idle 
-  // Transitions with triggers
-  transition from Idle to Measuring
-    when control.start / assign elapsedTime := -1
-  transition from Measuring to Measuring
-    when control.tick && !(control.stop)
-  transition from Measuring to Idle
-    when control.stop
-  // Main region
-  region main {
-    // Initial state
-    initial Initial
-    // Simple state
-    state Idle
-    // Simple state with entry action
-    state Measuring {
-      entry / assign elapsedTime := elapsedTime + 1
-    }		
-  }
-}
-\end{lstlisting}
-
-Statecharts communicate with their environment via \textsl{ports} using \textsl{events}. A port realizes an \textsl{interface} in either required or provided mode, which determines the event types that can be dispatched or received through the particular port. The language supports the definition of \textsl{variables} with the following types: integer, natural, real, boolean and enumeration types. Variables can be used in guard expressions and assignment expressions of \textsl{transitions}. Events of ports can also be raised by transitions.
-
-One of the unique features of the \gamma\ statechart language is the \textsl{complex trigger}. A complex trigger, consisting of simple triggers, can describe the relation
-of multiple triggers as logical relations. A complex trigger may initiate a particular execution only if the corresponding logical relation is evaluated to true. Furthermore, an execution can be
-initiated on the absence of a certain event.
-
-\textsl{Region} is the container element of node elements. A region can either be a top region, contained by a statechart or a subregion,
-contained by a composite state. A region must contain a single entry state, which can be an \textsl{initial state} (no history), a \textsl{shallow history} or \textsl{deep history state}. \textsl{States} can have \textsl{entry} and
-\textsl{exit events}, which specify different actions that have to be taken when the state is activated
-or deactivated, respectively. \textsl{Composite states} extend simple states with the ability of containing
-one ore more regions. If a particular state contains multiple regions, they are parallel.
+%\section{The Gamma Statechart Language}
+%\label{sec:statechart-language}
+%The goal of the \gamma\ statechart language is to support the rigorous design of reactive
+%systems while providing conventional facilities of modern statechart languages. To support
+%strictness, a well-defined semantics is needed. The language is given a denotational semantics
+%described in \cite{graics-bence-bsc} by mapping gamma model constructions to the elements of a formal timed
+%automaton implementation. The most important elements of the language are presented in this section using a simple \emph{timer} statechart capable of measuring time.
+%
+%The execution of the statechart starts in the \textsl{Idle} state, with the \textsl{elapsedTime} variable set to $-1$. When a \textsl{start} event is received on its \textsl{control} port, it changes its state to \textsl{Measuring}, where the incoming \textsl{tick} events are counted using a loop transition. When a \textsl{stop} event is received, the statechart goes back to state \textsl{Idle} while storing the elapsed number of ticks in variable \textsl{elapsedTime}. The measuring process can be restarted with an additional \textsl{start} event.
+%\begin{lstlisting}
+%statechart Timer [
+%  // Port for communication
+%  port control : provides Control
+%] {
+%  var elapsedTime : integer := -1
+%  // Transition without trigger
+%  transition from Initial to Idle 
+%  // Transitions with triggers
+%  transition from Idle to Measuring
+%    when control.start / assign elapsedTime := -1
+%  transition from Measuring to Measuring
+%    when control.tick && !(control.stop)
+%  transition from Measuring to Idle
+%    when control.stop
+%  // Main region
+%  region main {
+%    // Initial state
+%    initial Initial
+%    // Simple state
+%    state Idle
+%    // Simple state with entry action
+%    state Measuring {
+%      entry / assign elapsedTime := elapsedTime + 1
+%    }		
+%  }
+%}
+%\end{lstlisting}
+%
+%Statecharts communicate with their environment via \textsl{ports} using \textsl{events}. A port realizes an \textsl{interface} in either required or provided mode, which determines the event types that can be dispatched or received through the particular port. The language supports the definition of \textsl{variables} with the following types: integer, natural, real, boolean and enumeration types. Variables can be used in guard expressions and assignment expressions of \textsl{transitions}. Events of ports can also be raised by transitions.
+%
+%One of the unique features of the \gamma\ statechart language is the \textsl{complex trigger}. A complex trigger, consisting of simple triggers, can describe the relation
+%of multiple triggers as logical relations. A complex trigger may initiate a particular execution only if the corresponding logical relation is evaluated to true. Furthermore, an execution can be
+%initiated on the absence of a certain event.
+%
+%\textsl{Region} is the container element of node elements. A region can either be a top region, contained by a statechart or a subregion,
+%contained by a composite state. A region must contain a single entry state, which can be an \textsl{initial state} (no history), a \textsl{shallow history} or \textsl{deep history state}. \textsl{States} can have \textsl{entry} and
+%\textsl{exit events}, which specify different actions that have to be taken when the state is activated
+%or deactivated, respectively. \textsl{Composite states} extend simple states with the ability of containing
+%one ore more regions. If a particular state contains multiple regions, they are parallel.
 
 \section{The Gamma Composition Language}
 \label{sec:composition-language}
