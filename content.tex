@@ -1,12 +1,17 @@
+% !TeX spellcheck = en_US
 % As a general rule, do not put math, special symbols or citations
 % in the abstract
 \begin{abstract}
 %	Many of today's safety-critical systems are reactive, embedded systems. Their internal behavior is usually represented by state-based models. Furthermore, as the tasks carried out by such systems are getting more and more complex, there is a strong need for compositional modeling languages. Such modeling formalisms start from the component-level and use composition to build the system-level model as a collection of simple modules.
 %	There are a number of solutions supporting the model-based development of safety-critical embedded systems. One of the popular open-source tools is Yakindu, a statechart editor with a rich language and code generation capabilities. However, Yakindu so far lacks support for compositional modeling.
 %	This paper proposes a formal compositional language tailored to the semantics of Yakindu statecharts. We propose precise semantics for the composition to facilitate formal analysis and precise code generation. Based on the formal basis laid out here, we plan to build a complete tool-chain for the design and verification of component-based reactive systems.
-Programmable controllers are used extensively in several domains such as automotive and railways systems. These controllers react to the stimuli received from their environments in accordance with their internal states. The development of such reactive systems are oftentimes based on statecharts assisted by modeling tools. Several tools support the development of composite systems as the composition of individual components according to different semantics. This paper presents the new composition language of the \gamma\ Statechart Composition Framework, which supports statechart composition according to three different semantics: asynchronous-reactive, synchronous-reactive and cascade. Asynchronous-reactive semantics supports the proper abstraction of distributed communication,
+The \gamma\ Statechart Composition Framework is a modeling tool that supports the hierarchical composition of statechart components with well-defined compositonal semantics, as well as source code generation and formal verification. The purpose of the tool is to provide common ground for modeling and verification tools, as well as to support component-based system design building on existing statechart modeling tools. Currently, the framework has a single compositional semantics, which executes the components in a lock-step fashion.
+%Programmable controllers are used extensively in several domains such as automotive and railways systems. These controllers react to the stimuli received from their environments in accordance with their internal states. The development of such reactive systems are often based on statecharts assisted by modeling tools. Several tools support the development of composite systems as the composition of individual components according to different semantics. 
+This paper presents a new composition language for the \gamma\ Framework, which adds support for two more semantics.
+%, extending the list of options to asynchronous-reactive, synchronous-reactive and cascade composition. 
+Asynchronous-reactive semantics supports the proper abstraction of distributed communication,
 synchronous-reactive supports the modeling of highly synchronous
-communication, and cascade is for the linear decomposition of a single function. The introduction of the language elements are supported with simple examples. In the future, we plan to extend the code generation and verification capabilities of the framework to support the new modeling semantics.
+communication, and cascade composition is a sequential decomposition of a single function. The introduction of the language elements are supported with simple examples.
 \end{abstract}
 % For peer review papers, you can put extra information on the cover
 % page as needed:
@@ -22,35 +27,36 @@ communication, and cascade is for the linear decomposition of a single function.
 \label{sec:introduction}
 Statecharts \cite{Harel:1987:SVF:34884.34886} are a widely used formalism to describe the behavior of reactive systems, which process stimuli from the environment and react with respect to their internal states. Statecharts introduce complex elements to aid the modeling of such systems, e.g., variables, hierarchical state refinement, history states and complex transitions (e.g., inner transitions).
 
-The requirements such systems have to meet are getting more complex, which can result in very large system models, encumbering verifiability, maintenance and extensibility. A well-known solution for managing complexity is decomposition. In case of statecharts, one way of decomposition is to define individual reactive components that, by means of some communication, realize a more complex behavior. There are a number of modeling tools that aim to support this practice with various model-driven software development techniques such as code generation and verification.
+The requirements such systems have to meet are getting more complex, which can result in very large system models, hindering verifiability, maintenance and extensibility. A well-known solution for managing complexity is decomposition. In case of statecharts, one way of decomposition is to define individual reactive components that, by means of communication, realize a more complex behavior. There are a number of modeling tools that aim to support this practice with various model-driven software development techniques such as code generation and verification.
 
-The Gamma Statechart Composition Framework is one such tool, providing a layer for composing individual statechart components (possibly coming from other tools) while extending the capabilities of automatic code generation and verification and validation (V\&V). In this paper, we introduce the new composition language of Gamma that enables the hierarchical mixing of different composition semantics, with a focus on features and modeling aspects.
+The Gamma Statechart Composition Framework is one such tool, providing a layer for composing individual statechart components (possibly coming from other tools) while extending the capabilities of automatic code generation and verification and validation (V\&V). In this paper, we propose a new composition language for Gamma that enables the hierarchical mixing of different composition semantics, with a focus on features and modeling aspects.
 
-\textbf{Asynchronous-reactive:} Such models represent a set of components that are executed independently. Asynchronous components communicate with each other by means of messages and message queues. This semantics is convenient when decomposition is both logical and physical, \eg for the design of communicating microservices running in different processes.
+\textbf{Asynchronous-reactive:} Such models represent a set of components that are executed independently. Asynchronous components communicate by means of messages and message queues. This semantics is convenient when decomposition is both logical and physical, \eg for the design of communicating microservices running in different processes.
 	
-\textbf{Synchronous-reactive:} A synchronous model represents a coherent unit with a single functionality consisting of concurrently (but not independently) running components. Contained components communicate in a synchronous manner using signals. This semantics is suitable for the logical decomposition of synchronous systems or the modeling of hardware-related designs.
+\textbf{Synchronous-reactive:} A synchronous model represents a coherent unit with a single functionality consisting of concurrent (but not independent) components executed in a lock-step fashion. Contained components communicate in a synchronous manner using signals. This semantics is suitable for the logical decomposition of synchronous systems or the modeling of hardware-related designs.
 	
 \textbf{Cascade:} Cascade models represent a set of filters that are applied sequentially to derive an output from an input. Like synchronous-reactive components, cascade components also facilitate the logical decomposition of a problem, but it focuses more heavily on process-like models. Therefore, this model supports the design of adapters, runtime monitors and units with a batch-like execution.
 
-The rest of the paper is structured as follows. Section~\ref{sec:related-tools} presents a short summary of tools that inspired the design of the composition language. The elements of a the language itself and an example are introduced in Section \ref{sec:composition-language}. Finally, Section \ref{sec:conclusion} provides concluding remarks and ideas for future work.
+The rest of the paper is structured as follows. Section~\ref{sec:related-tools} presents a short summary of tools that inspired the design of the composition language. The elements of the language itself and an example are introduced in Section \ref{sec:composition-language}. Finally, Section \ref{sec:conclusion} provides concluding remarks and ideas for future work.
 
 \section{Related Tools}
 \label{sec:related-tools}
 
-\ptolemy\footnote{\url{http://ptolemy.eecs.berkeley.edu/}} \cite{ptolemy,ptolemy2} is an open-source modeling framework aiming to support
-the modeling of hierarchical composite systems. It supports system design with numerous component variants and communication semantics. Communication semantics of interactive components are determined by \emph{directors}, which are responsible for defining a \emph{model of computation} on a particular hierarchy level. Various directors (e.g., process network, synchronous data flow
-or synchronous reactive) through different hierarchy levels can be combined, facilitating the design of complex model behavior. One of the main strengths of Ptolemy II is the simulation capability of designed models. However, source code generation from models is not supported and it does not provide formal verification capabilities either.
+\ptolemy\footnote{\url{http://ptolemy.eecs.berkeley.edu/}} \cite{ptolemy,ptolemy2} is an open-source framework aiming to support
+the modeling of hierarchical composite systems with numerous component variants and communication semantics. Communication semantics are determined by \emph{directors}, which are responsible for defining a \emph{model of computation} on a particular hierarchy level. Various directors (e.g., process network, synchronous data flow
+or synchronous reactive) can be combined through different hierarchy levels, facilitating the design of complex model behavior. One of the main strengths of Ptolemy II is its simulation capability. However, source code generation and formal verification are not supported.
 
 BIP\footnote{\url{http://www-verimag.imag.fr/Rigorous-Design-of-Component-Based.html?lang=en}} \cite{bip,bip3} is a modeling framework that focuses on the formal definition of heterogeneous systems.
-BIP offers a language to define hierarchical composite models, where the interactions of constituent components are based on \emph{synchronization}. BIP defines a clear operational semantics that describes the behavior for both atomic components (transition system model) and compound components (rigorous interaction rules of contained components). Moreover, BIP offers a comprehensive tool set, which provides model transformers for third-party models, e.g., MATLAB/Simulink, code generators to produce C/C++ code, and formal
-verification capabilities of defined BIP models.
+BIP offers a language to define hierarchical composite models, where the interactions of constituent components are based on \emph{synchronization}. BIP defines a clear operational semantics that describes the behavior for both atomic components (transition system model) and compound components (rigorous rules for component interactions). Moreover, BIP offers a comprehensive tool set, which provides model transformers for third-party models, code generators, and formal
+verification capabilities.
 
 Stateflow\footnote{\url{https://www.mathworks.com/products/stateflow.html}} \cite{stateflow} is a commercial framework that supports the modeling of
 reactive systems. Stateflow supports the design of
-statecharts by combining
-statechart diagrams with flowchart diagrams and providing various scheduling
-algorithms. Furthermore, Stateflow supports the simulation, validation and verification of created models as well as source code generation. Stateflow is a mature software with professional
-support. Unfortunately, as Stateflow is a commercial product, its study and extension is cumbersome, which is not favorable in research context. Also, commercial licenses are expensive.
+statecharts and provides various scheduling
+algorithms. Furthermore, Stateflow supports the simulation, validation and verification of models as well as source code generation. Stateflow is a mature commercial software product with professional
+support. As such, the possibilities of extending or integrating it with other software is limited. Furthermore, it is very expensive even for research purposes.
+
+Gamma was designed to provide an extensible framework for the design of statechart-based composite systems, inspired by the merits and limitations of the presented tools. 
 
 
 %\section{The Gamma Statechart Language}
@@ -106,88 +112,89 @@ support. Unfortunately, as Stateflow is a commercial product, its study and exte
 \section{The Gamma Composition Language}
 \label{sec:composition-language}
 The \gamma\ composition language supports the definition of communicating composite models
-built from individual reactive components. The design of composite systems starts with the definition of interfaces, which define the possible event types that can be transmitted between components. The interfaces then can be realized by ports of components, which can be connected, enabling communication. Communicating components can be wrapped by composite models, creating an independent composite reactive unit with rigorously defined interaction patterns.
+built from individual reactive components. The design of composite systems starts with the definition of interfaces, which define the possible event types that can be transmitted between components. The interfaces can be realized by ports of components, which can be connected with channels, enabling communication. Communicating components can be wrapped by composite models, creating an independent composite reactive unit with rigorously defined interaction patterns.
 
 \subsection{Communication Elements}
 \label{sec:communication-elements}
-Interfaces serve as contracts between
-interacting components of \gamma\ models. These contracts apply to the ability of dispatching
-and receiving certain events. Events represent occurrences of some importance. Directions of events can be in, out or in-out;
-the latter represents events that can be used as both in and out events. Events can contain
-parameter declarations, which provide additional information about the corresponding event. An example interface definition can be seen below.
+
+In the \emph{Gamma Composition Language}, components communicate through \emph{ports}. Each port defines a point of service through which certain \emph{event notifications} can be sent or received. An event notification (or event for short) is a piece of information passed between components, which can also have \emph{parameters} to forward data. Events are declared on \emph{interfaces}, which may be realized by ports. An event may be declared as \emph{input}, \emph{output} or \emph{in/out}, which means that it can be received, sent or both through the realizing port. The declared direction will be reversed, however, if the port does not \emph{provide}, but \emph{require} the interface, which are the two possible modes in which a port can realize an interface. A \emph{broadcast interface} is a special type of interface on which every event is \emph{output}. This approach is similar to how the Franca Interface Definition Language defines interfaces.\footnote{The Franca IDL is an Eclipse Proposal: \url{http://www.eclipse.org/proposals/modeling.franca/}}
+
+The concept of input and output events with the two modes of interface realization may be unusual at first sight, since ports in UML-like modeling languages support event reception and method declarations only, both of which are services that can be invoked. Our goal with this solution is to investigate the possibilities of precise interface-based communication in the domain of reactive systems. On the other hand, it is possible to use only \textsl{out} events on every interface -- then provided mode is ``output'' mode and required
+mode is ``input'' mode.
+
+%Interfaces serve as contracts between
+%interacting components of \gamma\ models. These contracts apply to the ability of dispatching
+%and receiving certain events. Events represent occurrences of some importance. Directions of events can be in, out or in-out;
+%the latter represents events that can be used as both in and out events. Events can contain
+%parameter declarations, which provide additional information about the corresponding event. An example interface definition can be seen below.
 \begin{lstlisting}
-interface LightCommands {
-  out event displayRed
-  out event displayGreen
-  out event displayYellow
-  out event displayNone
+interface Status {
+  in event query
+  out event status(code : integer)
 }
-interface PoliceInterrupt {
-  out event police
+interface PoliceInterrupt { // A broadcast interface
+  out event interrupt
 }
 \end{lstlisting}
 
-Ports serve as endpoints of component instances in a composite component model,
-through which events can be dispatched and received. In \gamma\ models, communication between component
-instances always happens through ports. Events are either called signals in case of
-synchronous components or messages in case of asynchronous components. Each port realizes
-a single interface in either \emph{provided} or \emph{required} mode. In provided mode ports dispatch and receive events according to the direction specified in the event declarations. In case of required mode, interfaces are ``turned inside out'', i.e., events declared with the direction \textsl{in} will be
-dispatched, and events declared with the direction \textsl{out} will be received through such ports. Note that if two ports realize the same interface, one of them in provided mode, the other
-one in required mode, they can be connected. Also,
-the realization mode does not specify a single direction in which events are transmitted
-through the particular port -- dispatch and reception can be mixed in both cases.
-
-A port is considered as a \emph{broadcast} port if the interface realization mode is provided and
-the realized interface contains only out events. Unlike other ports, a broadcast port can
-be connected to multiple ports realizing the same interface in required mode.
-
-The concept of ports realizing interfaces in providing or requiring modes may be unusual to
-some designers, since ports usually support one-way event transmission in modern modeling
-languages. Our goal with this solution is to investigate the possibilities residing in interface-based
-communication in the domain of reactive systems. On the other hand, it is possible to
-use only \textsl{out} events on every interface -- then provided mode is ``output'' mode and required
-mode is ``input'' mode.
+%Ports serve as endpoints of component instances in a composite component model,
+%through which events can be dispatched and received. In \gamma\ models, communication between component
+%instances always happens through ports. Events are either called signals in case of
+%synchronous components or messages in case of asynchronous components. Each port realizes
+%a single interface in either \emph{provided} or \emph{required} mode. In provided mode ports dispatch and receive events according to the direction specified in the event declarations. In case of required mode, interfaces are ``turned inside out'', i.e., events declared with the direction \textsl{in} will be
+%dispatched, and events declared with the direction \textsl{out} will be received through such ports. Note that if two ports realize the same interface, one of them in provided mode, the other
+%one in required mode, they can be connected. Also,
+%the realization mode does not specify a single direction in which events are transmitted
+%through the particular port -- dispatch and reception can be mixed in both cases.
+%
+%A port is considered as a \emph{broadcast} port if the interface realization mode is provided and
+%the realized interface contains only out events. Unlike other ports, a broadcast port can
+%be connected to multiple ports realizing the same interface in required mode.
 
 \subsection{Components}
-Components serve as types of component instances in \gamma\ composite models. As introduced in \ref{sec:communication-elements}, each component defines one or more ports through which communication can take place, as presented in the following snippet.
+Components are the basic building blocks of composite Gamma models. The declaration of a component always defines one or more ports in the header which may be referred to in the definition, as presented in the following snippet.
 \begin{lstlisting}
+// Declaration of a synchronous-reactive component
 sync Crossroad [
   port police : requires PoliceInterrupt,
-  port priorityLightOutput : provides LightCommands,
-  port secondaryLightOutput : provides LightCommands
+  port priorityLight : provides LightCommands,
+  port secondaryLight : provides LightCommands
 ]
 \end{lstlisting}
 
-A component can be either \emph{atomic}, which wraps a single statechart, or \emph{composite}, which wraps one or more component instances. Statecharts can be defined using the \gamma\ Statechart Language, presented in \cite{graics-bence-bsc}. Each composite component type -- asynchronous-reactive, synchronous-reactive and cascade -- adopts a rigorous computational semantics. However, each composition mode is based on the same basic modeling elements: component instances, port bindings and channels.
+A component can be either \emph{atomic}, which wraps a single statechart, or \emph{composite}, which wraps one or more component instances. Statecharts can be defined in the \gamma\ Statechart Language, presented in \cite{graics-bence-bsc}. Composite components may adopt three types of semantics, but regardless of that, they will comprise of the same basic modeling elements: component instances, port bindings and channels.
 
-\paragraph{Component instance} Component instances are individual reactive elements with internal state, capable of receiving
-and dispatching events through ports. Each component instance refers to a single
-component, serving as its type, which determines the ports on which
-the component instance shall be able to communicate as well as the internal states it shall
-be able to assume and the transitions it shall be able to fire. Component instances can
-be either atomic or composite. The instance is atomic if the corresponding component is a
-statechart definition and composite if it refers to a composite component. This enables the
-hierarchical composition of \gamma\ models.
+\paragraph{Component instance} Component declarations can be instantiated in composite component definitions, but they may not contain themselves (not even transitively). Composite components may contain instances of other composite components, yielding a hierarchical composition.
+Component instances inherit the declared ports through which they can communicate.
+%are individual reactive elements with internal state, capable of receiving
+%and dispatching events through ports. Each component instance refers to a single
+%component, serving as its type, which determines the ports on which
+%the component instance shall be able to communicate as well as the internal states it shall
+%be able to assume and the transitions it shall be able to fire. Component instances can
+%be either atomic or composite. The instance is atomic if the corresponding component is a
+%statechart definition and composite if it refers to a composite component. This enables the
+%hierarchical composition of \gamma\ models.
 
 \begin{lstlisting}
 // Component instances with component types
-component controller : Controller
-component priorityLight : TrafficLight
-component secondaryLight : TrafficLight
+component crossroadInstance : Crossroad
 \end{lstlisting}
 
-\paragraph{Port binding} The port binding element is responsible for the connection of the exterior
-ports of a composite component and the ports of constituent component instances. Therefore,
-it refers to a single port of a component instance in addition to the bound composite model port. Owing to this design, all events received on the particular composite component port will be transmitted to the port of the associated
-component instance, and all the events dispatched through the particular instance port will
-be transmitted to the composite component port.
+\paragraph{Port binding} The port binding element is responsible for mapping the declared ports of a composite component to one of the ports of its constituent components.
+
+%the connection of the exterior
+%ports of a composite component and the ports of constituent component instances. Therefore,
+%it refers to a single port of a component instance in addition to the bound composite model port. Owing to this design, all events received on the particular composite component port will be transmitted to the port of the associated
+%component instance, and all the events dispatched through the particular instance port will
+%be transmitted to the composite component port.
 
 \begin{lstlisting}
 // Binding component ports to internal ports
 bind police -> controller.policeInterrupt
-bind priorityLightOutput -> priorityLight.lightCommands
-bind secondaryLightOutput -> secondaryLight.lightCommands
+bind priorityLight -> priorityLight.lightCommands
 \end{lstlisting}
+
+In the example above, the \emph{police} port of the composite Crossroad component declaration is mapped to the \emph{policeInterrupt} port of the component instance called \emph{controller}. This means that any event received through the \emph{police} port will be instantaneously forwarded to the \emph{policeInterrupt} port, and any event sent through the \emph{policeInterrupt} port will be send through the \emph{police} port.
 
 \paragraph{Channel} Channels are responsible for the connection of the ports of component instances, enabling event flow between ports. There are two types of channels, \emph{simple channel} and \emph{broadcast channel}. Simple channels support the connection of a single port providing and a single port
 requiring the same interface. As explained in Section \ref{sec:communication-elements}, this design is valid and safe
