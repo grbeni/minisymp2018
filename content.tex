@@ -2,17 +2,8 @@
 % As a general rule, do not put math, special symbols or citations
 % in the abstract
 \begin{abstract}
-%	Many of today's safety-critical systems are reactive, embedded systems. Their internal behavior is usually represented by state-based models. Furthermore, as the tasks carried out by such systems are getting more and more complex, there is a strong need for compositional modeling languages. Such modeling formalisms start from the component-level and use composition to build the system-level model as a collection of simple modules.
-%	There are a number of solutions supporting the model-based development of safety-critical embedded systems. One of the popular open-source tools is Yakindu, a statechart editor with a rich language and code generation capabilities. However, Yakindu so far lacks support for compositional modeling.
-%	This paper proposes a formal compositional language tailored to the semantics of Yakindu statecharts. We propose precise semantics for the composition to facilitate formal analysis and precise code generation. Based on the formal basis laid out here, we plan to build a complete tool-chain for the design and verification of component-based reactive systems.
-The \gamma\ Statechart Composition Framework is a modeling tool that supports the hierarchical composition of statechart components with well-defined compositonal semantics, as well as source code generation and formal verification. The purpose of the tool is to provide common ground for modeling and verification tools, as well as to support component-based system design building on existing statechart modeling tools. Currently, the framework has a single compositional semantics, which executes the components in a lock-step fashion.
-%Programmable controllers are used extensively in several domains such as automotive and railways systems. These controllers react to the stimuli received from their environments in accordance with their internal states. The development of such reactive systems are often based on statecharts assisted by modeling tools. Several tools support the development of composite systems as the composition of individual components according to different semantics. 
-This paper presents a new composition language for the \gamma\ Framework, which adds support for two more semantics.
-%, extending the list of options to asynchronous-reactive, synchronous-reactive and cascade composition. 
-Asynchronous-reactive semantics supports the proper abstraction of distributed communication,
-synchronous-reactive supports the modeling of highly synchronous
-communication, and cascade composition is a sequential decomposition of a single function. 
-%The introduction of the language elements are supported with simple examples.
+
+The \gamma\ Statechart Composition Framework is a modeling tool that supports the hierarchical composition of statechart components with well-defined compositonal semantics, as well as source code generation and formal verification. The purpose of the tool is to provide common ground for modeling and verification tools, as well as to support component-based system design building on existing statechart modeling tools. Currently, the framework has a single compositional semantics, which executes the components in a lockstep fashion. This paper presents a new composition language for the \gamma\ Framework, which adds support for two more semantics. Asynchronous-reactive semantics supports the proper abstraction of distributed communication, synchronous-reactive supports the modeling of highly synchronous communication, and cascade composition is a sequential decomposition of a single function. 
 \end{abstract}
 % For peer review papers, you can put extra information on the cover
 % page as needed:
@@ -34,7 +25,7 @@ The Gamma Statechart Composition Framework is one such tool, providing a layer f
 
 \textbf{Asynchronous-reactive:} Such models represent a set of components that are executed independently. Asynchronous components communicate by means of messages and message queues. This semantics is convenient when decomposition is both logical and physical, \eg for the design of communicating microservices running in different processes.
 	
-\textbf{Synchronous-reactive:} A synchronous model represents a coherent unit with a single functionality consisting of concurrent (but not independent) components executed in a lock-step fashion. Contained components communicate in a synchronous manner using signals. This semantics is suitable for the logical decomposition of synchronous systems or the modeling of hardware-related designs.
+\textbf{Synchronous-reactive:} A synchronous model represents a coherent unit with a single functionality consisting of concurrent (but not independent) components executed in a lockstep fashion. Contained components communicate in a synchronous manner using signals. This semantics is suitable for the logical decomposition of synchronous systems or the modeling of hardware-related designs.
 	
 \textbf{Cascade:} Cascade models represent a set of filters that are applied sequentially to derive an output from an input. Like synchronous-reactive components, cascade components also facilitate the logical decomposition of a problem, but it focuses more heavily on process-like models. Therefore, this model supports the design of adapters, runtime monitors and units with a batch-like execution.
 
