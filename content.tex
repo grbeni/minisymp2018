@@ -11,7 +11,8 @@ This paper presents a new composition language for the \gamma\ Framework, which 
 %, extending the list of options to asynchronous-reactive, synchronous-reactive and cascade composition. 
 Asynchronous-reactive semantics supports the proper abstraction of distributed communication,
 synchronous-reactive supports the modeling of highly synchronous
-communication, and cascade composition is a sequential decomposition of a single function. The introduction of the language elements are supported with simple examples.
+communication, and cascade composition is a sequential decomposition of a single function. 
+%The introduction of the language elements are supported with simple examples.
 \end{abstract}
 % For peer review papers, you can put extra information on the cover
 % page as needed:
@@ -67,7 +68,7 @@ Gamma was designed to provide an extensible framework for the design of statecha
 %described in \cite{graics-bence-bsc} by mapping gamma model constructions to the elements of a formal timed
 %automaton implementation. The most important elements of the language are presented in this section using a simple \emph{timer} statechart capable of measuring time.
 %
-%The execution of the statechart starts in the \textsl{Idle} state, with the \textsl{elapsedTime} variable set to $-1$. When a \textsl{start} event is received on its \textsl{control} port, it changes its state to \textsl{Measuring}, where the incoming \textsl{tick} events are counted using a loop transition. When a \textsl{stop} event is received, the statechart goes back to state \textsl{Idle} while storing the elapsed number of ticks in variable \textsl{elapsedTime}. The measuring process can be restarted with an additional \textsl{start} event.
+%The execution of the statechart starts in the \emph{Idle} state, with the \emph{elapsedTime} variable set to $-1$. When a \emph{start} event is received on its \emph{control} port, it changes its state to \emph{Measuring}, where the incoming \emph{tick} events are counted using a loop transition. When a \emph{stop} event is received, the statechart goes back to state \emph{Idle} while storing the elapsed number of ticks in variable \emph{elapsedTime}. The measuring process can be restarted with an additional \emph{start} event.
 %\begin{lstlisting}
 %statechart Timer [
 %  // Port for communication
@@ -97,29 +98,29 @@ Gamma was designed to provide an extensible framework for the design of statecha
 %}
 %\end{lstlisting}
 %
-%Statecharts communicate with their environment via \textsl{ports} using \textsl{events}. A port realizes an \textsl{interface} in either required or provided mode, which determines the event types that can be dispatched or received through the particular port. The language supports the definition of \textsl{variables} with the following types: integer, natural, real, boolean and enumeration types. Variables can be used in guard expressions and assignment expressions of \textsl{transitions}. Events of ports can also be raised by transitions.
+%Statecharts communicate with their environment via \emph{ports} using \emph{events}. A port realizes an \emph{interface} in either required or provided mode, which determines the event types that can be dispatched or received through the particular port. The language supports the definition of \emph{variables} with the following types: integer, natural, real, boolean and enumeration types. Variables can be used in guard expressions and assignment expressions of \emph{transitions}. Events of ports can also be raised by transitions.
 %
-%One of the unique features of the \gamma\ statechart language is the \textsl{complex trigger}. A complex trigger, consisting of simple triggers, can describe the relation
+%One of the unique features of the \gamma\ statechart language is the \emph{complex trigger}. A complex trigger, consisting of simple triggers, can describe the relation
 %of multiple triggers as logical relations. A complex trigger may initiate a particular execution only if the corresponding logical relation is evaluated to true. Furthermore, an execution can be
 %initiated on the absence of a certain event.
 %
-%\textsl{Region} is the container element of node elements. A region can either be a top region, contained by a statechart or a subregion,
-%contained by a composite state. A region must contain a single entry state, which can be an \textsl{initial state} (no history), a \textsl{shallow history} or \textsl{deep history state}. \textsl{States} can have \textsl{entry} and
-%\textsl{exit events}, which specify different actions that have to be taken when the state is activated
-%or deactivated, respectively. \textsl{Composite states} extend simple states with the ability of containing
+%\emph{Region} is the container element of node elements. A region can either be a top region, contained by a statechart or a subregion,
+%contained by a composite state. A region must contain a single entry state, which can be an \emph{initial state} (no history), a \emph{shallow history} or \emph{deep history state}. \emph{States} can have \emph{entry} and
+%\emph{exit events}, which specify different actions that have to be taken when the state is activated
+%or deactivated, respectively. \emph{Composite states} extend simple states with the ability of containing
 %one ore more regions. If a particular state contains multiple regions, they are parallel.
 
 \section{The Gamma Composition Language}
 \label{sec:composition-language}
-The \gamma\ composition language supports the definition of communicating composite models
+The \emph{Gamma Composition Language} (GCL) supports the definition of communicating composite models
 built from individual reactive components. The design of composite systems starts with the definition of interfaces, which define the possible event types that can be transmitted between components. The interfaces can be realized by ports of components, which can be connected with channels, enabling communication. Communicating components can be wrapped by composite models, creating an independent composite reactive unit with rigorously defined interaction patterns.
 
 \subsection{Communication Elements}
 \label{sec:communication-elements}
 
-In the \emph{Gamma Composition Language}, components communicate through \emph{ports}. Each port defines a point of service through which certain \emph{event notifications} can be sent or received. An event notification (or event for short) is a piece of information passed between components, which can also have \emph{parameters} to forward data. Events are declared on \emph{interfaces}, which may be realized by ports. An event may be declared as \emph{input}, \emph{output} or \emph{in/out}, which means that it can be received, sent or both through the realizing port. The declared direction will be reversed, however, if the port does not \emph{provide}, but \emph{require} the interface, which are the two possible modes in which a port can realize an interface. A \emph{broadcast interface} is a special type of interface on which every event is \emph{output}. This approach is similar to how the Franca Interface Definition Language defines interfaces.\footnote{The Franca IDL is an Eclipse Proposal: \url{http://www.eclipse.org/proposals/modeling.franca/}}
+In the GCL, components communicate through \emph{ports}. Each port defines a point of service through which certain \emph{event notifications} can be sent or received. An event notification (or event for short) is a piece of information passed between components, which can also have \emph{parameters} to forward data. Events are declared on \emph{interfaces}, which may be realized by ports. An event may be declared as \emph{input}, \emph{output} or \emph{in/out}, which means that it can be received, sent or both through the realizing port. The declared direction will be reversed, however, if the port does not \emph{provide}, but \emph{require} the interface, which are the two possible modes in which a port can realize an interface. A \emph{broadcast interface} is a special type of interface on which every event is \emph{output}. This approach is similar to how the Franca Interface Definition Language defines interfaces.\footnote{\url{http://www.eclipse.org/proposals/modeling.franca/}}
 
-The concept of input and output events with the two modes of interface realization may be unusual at first sight, since ports in UML-like modeling languages support event reception and method declarations only, both of which are services that can be invoked. Our goal with this solution is to investigate the possibilities of precise interface-based communication in the domain of reactive systems. On the other hand, it is possible to use only \textsl{out} events on every interface -- then provided mode is ``output'' mode and required
+The concept of input and output events with the two modes of interface realization may be unusual at first sight, since ports in UML-like modeling languages support event reception and method declarations only, both of which are services that can be invoked. Our goal with this solution is to investigate the possibilities of precise interface-based communication in the domain of reactive systems. On the other hand, it is possible to use only \emph{out} events on every interface -- then provided mode is ``output'' mode and required
 mode is ``input'' mode.
 
 %Interfaces serve as contracts between
@@ -141,8 +142,8 @@ interface PoliceInterrupt { // A broadcast interface
 %through which events can be dispatched and received. In \gamma\ models, communication between component
 %instances always happens through ports. Events are either called signals in case of
 %synchronous components or messages in case of asynchronous components. Each port realizes
-%a single interface in either \emph{provided} or \emph{required} mode. In provided mode ports dispatch and receive events according to the direction specified in the event declarations. In case of required mode, interfaces are ``turned inside out'', i.e., events declared with the direction \textsl{in} will be
-%dispatched, and events declared with the direction \textsl{out} will be received through such ports. Note that if two ports realize the same interface, one of them in provided mode, the other
+%a single interface in either \emph{provided} or \emph{required} mode. In provided mode ports dispatch and receive events according to the direction specified in the event declarations. In case of required mode, interfaces are ``turned inside out'', i.e., events declared with the direction \emph{in} will be
+%dispatched, and events declared with the direction \emph{out} will be received through such ports. Note that if two ports realize the same interface, one of them in provided mode, the other
 %one in required mode, they can be connected. Also,
 %the realization mode does not specify a single direction in which events are transmitted
 %through the particular port -- dispatch and reception can be mixed in both cases.
@@ -154,7 +155,6 @@ interface PoliceInterrupt { // A broadcast interface
 \subsection{Components}
 Components are the basic building blocks of composite Gamma models. The declaration of a component always defines one or more ports in the header which may be referred to in the definition, as presented in the following snippet.
 \begin{lstlisting}
-// Declaration of a synchronous-reactive component
 sync Crossroad [
   port police : requires PoliceInterrupt,
   port priorityLight : provides LightCommands,
@@ -162,7 +162,7 @@ sync Crossroad [
 ]
 \end{lstlisting}
 
-A component can be either \emph{atomic}, which wraps a single statechart, or \emph{composite}, which wraps one or more component instances. Statecharts can be defined in the \gamma\ Statechart Language, presented in \cite{graics-bence-bsc}. Composite components may adopt three types of semantics, but regardless of that, they will comprise of the same basic modeling elements: component instances, port bindings and channels.
+A component can be either \emph{atomic}, which wraps a single statechart, or \emph{composite}, which wraps one or more component instances. Statecharts can be defined in the \emph{Gamma Statechart Language} (GSL), presented in \cite{graics-bence-bsc}. Composite components may adopt three types of semantics, but regardless of that, they will comprise of the same basic modeling elements: component instances, port bindings and channels.
 
 \paragraph{Component instance} Component declarations can be instantiated in composite component definitions, but they may not contain themselves (not even transitively). Composite components may contain instances of other composite components, yielding a hierarchical composition.
 Component instances inherit the declared ports through which they can communicate.
@@ -190,182 +190,181 @@ component crossroadInstance : Crossroad
 
 \begin{lstlisting}
 // Binding component ports to internal ports
-bind police -> controller.policeInterrupt
+bind police -> controller.police
 bind priorityLight -> priorityLight.lightCommands
 \end{lstlisting}
 
-In the example above, the \emph{police} port of the composite Crossroad component declaration is mapped to the \emph{policeInterrupt} port of the component instance called \emph{controller}. This means that any event received through the \emph{police} port will be instantaneously forwarded to the \emph{policeInterrupt} port, and any event sent through the \emph{policeInterrupt} port will be send through the \emph{police} port.
+In the example above, the \emph{police} port of the composite Crossroad component declaration is mapped to the \emph{policeInterrupt} port of the component instance \emph{controller}. This means that events received through the \emph{police} port will be instantaneously forwarded to the \emph{policeInterrupt} port, and events sent through the \emph{policeInterrupt} port will be sent through the \emph{police} port.
 
-\paragraph{Channel} Channels are responsible for the connection of the ports of component instances, enabling event flow between ports. There are two types of channels, \emph{simple channel} and \emph{broadcast channel}. Simple channels support the connection of a single port providing and a single port
-requiring the same interface. As explained in Section \ref{sec:communication-elements}, this design is valid and safe
-since they handle the same events with appropriate directions. Broadcast channels support sending events to multiple target ports. Such channels refer
-to \textit{1)} a single broadcast port and \text{2)} multiple ports requiring the same interface as the
-one the broadcast port provides. In this case the direction of event transmission is
-determined: the broadcast port dispatches events and all the other ports connected to
-it receive them.
+\paragraph{Channel} 
+Communication may happen through \emph{channels}. \emph{Simple channels} can connect two ports if they implement the same interface but in different modes, \ie the signal directions will be exactly the opposite on the two ports. \emph{Broadcast channels} are similar, but they allow a single port \emph{providing a broadcast interface} to be connected to multiple ports \emph{requiring the same broadcast interface}. Note that the language will restrict the usage of channels in certain compositional semantics, which is discussed in Section~\ref{sec:composite}.
+%does not allow a single port to be connected to more than one channel to avoid race conditions, when multiple signals could arrive to the same port at the same time, nondeterministically overwriting each other.
+
+%Channels are responsible for the connection of the ports of component instances, enabling event flow between ports. There are two types of channels, \emph{simple channel} and \emph{broadcast channel}. Simple channels support the connection of a single port providing and a single port
+%requiring the same interface. As explained in Section \ref{sec:communication-elements}, this design is valid and safe
+%since they handle the same events with appropriate directions. Broadcast channels support sending events to multiple target ports. Such channels refer
+%to \textit{1)} a single broadcast port and \text{2)} multiple ports requiring the same interface as the
+%one the broadcast port provides. In this case the direction of event transmission is
+%determined: the broadcast port dispatches events and all the other ports connected to
+%it receive them.
 
 \begin{lstlisting}
-// Channel definitions connecting internal ports
-channel [controller.priorityControl] -o)-
+// A simple and a broadcast channel
+channel [controller.priotityControl] -o)-
   [priorityLight.control]
-channel [controller.secondaryControl] -o)-
-  [secondaryLight.control]
+channel [controller.police] -o)-
+  [priorityLight.police, secondaryLight.police]
 \end{lstlisting}
 
 \subsection{Composite Component Variations}
-Composite components can be classified into \emph{synchronous} and \emph{asynchronous components} regarding their execution semantics.
+\label{sec:composite}
+
+Composite components can be \emph{synchronous} or \emph{asynchronous}, which will determine how they receive events and how they execute their constituent components.
 
 \subsubsection{Synchronous Components}
 Synchronous components represent models that communicate
-in a synchronous manner using \emph{signals}. Synchronous components do not run independently, but their
-execution is scheduled by a scheduler, e.g., a wrapping asynchronous component. When executed, synchronous components process incoming signals
-and produce output signals in accordance with their internal states. Output signals are
-produced for a single execution period only, i.e., another execution might produce different
-output signals overwriting the output signals of the previous one. Synchronous components in \gamma\ are the followings:  statechart definitions, synchronous composite
-components and cascade composite components.
+in a synchronous manner using \emph{signals}. Constituent components of synchronous composite components must be synchronous themselves and are executed in a lockstep fashion, triggered by the enclosing asynchronous component or an external actor.
+% Synchronous components do not run independently, but their
+% execution is scheduled by a scheduler, e.g., a wrapping asynchronous component. 
+When executed, synchronous components process incoming signals
+and produce output signals in accordance with their internal states. Input signals are not queued but sampled: upon execution, the component can access the most recent signal for every event on every port since the last execution (if any). Similarly, output signals are reset in every execution and every output event on every port may get a new signal assigned to it.
+%produced for a single execution period only, i.e., another execution might produce different
+%output signals overwriting the output signals of the previous one. 
+Synchronous components in \gamma\ are synchronous and cascade composite components and statechart definitions.% (described in the GSL).
 
-\paragraph{Synchronous composite component} The execution of a synchronous composite component
-conforms to a turn-based semantic. A turn is called a \emph{cycle}. In each cycle all component instances of the particular composite component are executed. Although the order of the execution of the component instances is not defined, it is fixed, therefore they are executed in the same order in each cycle. This does not cause a loss of generality, as components cannot affect each other in a single execution cycle: if a component instance produces a signal that another component instance receives, the receiver will get it in the next cycle. If a single component instance is executed it may \textit{1)} process all signals received in the last execution turn, \textit{2)} assume a new state according to the processed signals (new state configuration, new variable values) and \textit{3)} produce signals that can be received by components (others or itself).
+\paragraph{Synchronous composite component} 
+During the execution of a synchronous composite component, every constituent component is executed exactly once. The execution has two phases: \textit{1)} all components sample their inputs, then \textit{2)} outputs and new internal states are computed. This strategy guarantees that an output generated by a component will affect other components only in the next execution -- therefore the execution order is insignificant and the composition of deterministic components yields a deterministic composite component. This behavior was one of the most important design goals for synchronous-reactive compositions.
 
-\paragraph{Cascade composite component} Cascade composite components contain the same elements
-as synchronous composite components, but their execution semantics is different. The
-execution of a cascade composite component also consist of cycles. In a single cycle all components
-of the particular composite component are executed according to a topological ordering
-based on channels. If a component is executed, it processes all incoming signals and produces output
-signals. However, the signals are processed in the same
-execution cycle by receivers, and not in the next one as it is specified in synchronous composite
-components. Therefore, in cascade composite components the flow of signals is one-way:
-component instances earlier in the ordering transmit signals to the ones that are later, in
-accordance with channel definitions. This structure ensures that a component can process all
-signals it receives in a single cycle.
+The only case that could violate the deterministic behavior arises when an input event has more than one sources. In this case, one signal would overwrite the other, and their ``order'' would be unspecified. To avoid this, the language restricts the way ports can connected with channels: every port may be the endpoint of exactly one channel \emph{or} be bound to exactly one port of the enclosing component.
+%The execution of a synchronous composite component
+%conforms to a turn-based semantic. A turn is called a \emph{cycle}. In each cycle all component instances of the particular composite component are executed. Although the order of the execution of the component instances is not defined, it is fixed, therefore they are executed in the same order in each cycle. This does not cause a loss of generality, as components cannot affect each other in a single execution cycle: if a component instance produces a signal that another component instance receives, the receiver will get it in the next cycle. If a single component instance is executed it may \textit{1)} process all signals received in the last execution turn, \textit{2)} assume a new state according to the processed signals (new state configuration, new variable values) and \textit{3)} produce signals that can be received by components (others or itself).
 
-As a summary of synchronous composite models, the following code snippet defines an example Crossroad model, which is responsible for the control of two traffic lights at a crossroad. It has three ports for communication with the environment and contains three statechart component instances: two traffic lights and a controller unit. Each port of the composite component is bound to a port of a different component instance. Furthermore, channel definitions enable the communication (flow of signals) between the controller unit and the controlled traffic light components. Figure \ref{fig:crossroads-composite-model} presents the defined Crossroad model graphically.
+\paragraph{Cascade composite component} Conceptually, cascade composite components represent a set of ``filters'' through which inputs are transformed into outputs. Therefore, they will immediately see the output signals of other components in the same composition. This is achieved by merging the sampling and computation phases and performing them both when executing a component. Deterministic behavior is achieved by executing the components in the \emph{order of their instantiation}.
+
+This strategy guarantees that the effects of an input signal will be observable in the immediate output of the composite component (in case of synchronous composite components, the effect may be delayed by several execution cycles). Signals sent through feedback connections (\ie when a component sends a signal to another that comes earlier in the execution order) will be delayed until the next execution (they may be used for \eg abort signals from monitor components). Note that the synchronous and cascade composite components are semantically incompatible, \ie there are modeling designs which can be described in only one of the variants.
+%They contain the same elements
+%as synchronous composite components, but their execution semantics is different. The
+%execution of a cascade composite component also consist of cycles. In a single cycle all components
+%of the particular composite component are executed according to a topological ordering
+%based on channels. If a component is executed, it processes all incoming signals and produces output
+%signals. However, the signals are processed in the same
+%execution cycle by receivers, and not in the next one as it is specified in synchronous composite
+%components. Therefore, in cascade composite components the flow of signals is one-way:
+%component instances earlier in the ordering transmit signals to the ones that are later, in
+%accordance with channel definitions. This structure ensures that a component can process all
+%signals it receives in a single cycle.
+
+%As a summary of synchronous composite models, the following code snippet defines an example Crossroad model, which is responsible for the control of two traffic lights at a crossroad. It has three ports for communication with the environment and contains three statechart component instances: two traffic lights and a controller unit. Each port of the composite component is bound to a port of a different component instance. Furthermore, channel definitions enable the communication (flow of signals) between the controller unit and the controlled traffic light components. Figure \ref{fig:crossroads-composite-model} presents the defined Crossroad model graphically.
+The typical arrangement of a synchronous or cascade composite component definition is as follows.
 \begin{lstlisting}
-sync Crossroad [
-// External ports of the composite model
-port police : requires PoliceInterrupt,
-port priorityLightOutput : provides LightCommands,
-port secondaryLightOutput : provides LightCommands
+[sync|cascade] Crossroad [
+// Port declarations
+port police : requires PoliceInterrupt
+...
 ] {
 // Component instances
 component controller : Controller
-component priorityLight : TrafficLight
-component secondaryLight : TrafficLight
-// Bindings composite model ports to internal ports
+...
+// Binding composite model ports to internal ports
 bind police -> controller.policeInterrupt
-bind priorityLightOutput -> priorityLight.lightCommands
-bind secondaryLightOutput -> secondaryLight.lightCommands
+...
 // Channel definitions connecting internal ports
 channel [controller.priorityControl] -o)-
   [priorityLight.control]
-channel [controller.secondaryControl] -o)-
-  [secondaryLight.control]
-
-channel [controller.priorityPolice] -o)-
-  [priorityLight.policeInterrupt]
-channel [controller.secondaryPolice] -o)-
-  [secondaryLight.policeInterrupt]
+...
 }
 \end{lstlisting}
 
-\begin{figure}[!h]
-	\centering
-	\includegraphics[width=0.50\textwidth]{figures/Controller-gcd.pdf}
-	\caption{The synchronous Crossroad composite model composing a Controller and two Traffic light statecharts.}
-	\label{fig:crossroads-composite-model}
-\end{figure}
+%\begin{figure}[!h]
+%	\centering
+%	\includegraphics[width=0.50\textwidth]{figures/Controller-gcd.pdf}
+%	\caption{The synchronous Crossroad composite model composing a Controller and two Traffic light statecharts.}
+%	\label{fig:crossroads-composite-model}
+%\end{figure}
 
 \subsubsection{Asynchronous Components}
-Asynchronous components represent independently running instances. There is no guarantee on the running time or the running frequency of such components. Asynchronous components communicate with each other via ports using buffered \emph{messages}. There are two types of asynchronous components in \gamma: asynchronous composite component and synchronous component wrapper.
-\paragraph{Synchronous component wrapper} A synchronous component wrapper wraps a single synchronous component, turning it into an asynchronous component. In addition to the ports of the wrapped component, synchronous component wrappers have ports that are generally used for the reception of control messages. Furthermore, a synchronous component wrapper has one or more
-\emph{message queues}, which store the incoming messages of the component. A message queue has multiple attributes:
-\begin{itemize}
-	\item \textbf{Capacity} specifies the maximum number of messages that can be stored in the particular
-	queue.
-	\item \textbf{Priority} specifies the order in which the contents of message queues are retrieved during
-	the execution of the asynchronous component. A message is always retrieved from a
-	non-empty queue with the highest priority.
-	\item \textbf{Event types} specify the types of messages that can be stored in the particular message queue.
-\end{itemize}
+Asynchronous components represent independently running instances that communicate with \emph{messages}, collected in \emph{message queues}. There is no guarantee on the execution time or the execution frequency of components. 
+%Asynchronous components communicate with each other via ports using buffered \emph{messages}.
+There are two types of asynchronous components in \gamma: asynchronous composite components and synchronous component wrappers.
+
+\paragraph{Synchronous component wrapper} A synchronous component wrapper is used to declare an asynchronous component implemented by a single synchronous component. In addition to the ports of the wrapped component, synchronous component wrappers may declare additional ports for control messages, as well as zero or more \emph{clocks}, which emit \emph{tick} events at defined timed intervals.
+
+A synchronous component wrapper has one or more
+\emph{message queues}, which have the following attributes: \emph{capacity} specifies the maximum number of messages that can be stored in the particular	queue; \emph{priority} specifies the order in which message queues are processed during 	the execution of the asynchronous component (the next message is always retrieved from a non-empty queue with the highest priority); \emph{event types} specify the messages that will be put in the particular queue. Messages can be referred to either by specifically naming an event on a port, referring to all events on a port (with the \emph{any} keyword instead of an event), or specifying the name of a clock to refer to its tick event.
 
 During execution, messages are retrieved individually from messages queues. A message
 is always taken from the highest priority non-empty queue. If the particular message was
 received on a port that is implicitly derived from the wrapped component, the message is
 converted to a signal (as synchronous components communicate with signals) and transmitted
 to the wrapped synchronous component (potentially overwriting previously sent signals). If
-it was received on a port explicitly defined on the wrapper component, the message does not
-get transmitted.
+it was received on a port explicitly defined on the wrapper component, the message is not transmitted.
 
-A synchronous component wrapper also has one or more \emph{control specifications}, which
-specify the message types that are able to trigger the execution of the particular component.
-If a message with a specified type arrives to the wrapper component, the wrapped synchronous
-component may be executed in one of the following ways:
-\begin{itemize}
-	\item \textbf{Run once}: the wrapped component executes a single cycle.
-	\item \textbf{Run to completion}: the wrapped component executes as many cycles as needed to
-	ensure all inner signals are processed and no additional steps could be taken.
-	\item \textbf{Reset}: the wrapper component gets into its initial state.
-\end{itemize}
+A synchronous component wrapper also has one or more \emph{control specifications}, which describe when and how to execute the wrapped component. The trigger messages can be specified by referring to events as in case of message queues, while the execution mode can be one of the following: 
+%specify the message types that are able to trigger the execution of wrapped component.
+%If a message with a specified type arrives to the wrapper component, the wrapped synchronous
+%component may be executed in one of the following ways:
+\emph{``run once''} (\emph{run} keyword) to trigger a single execution of the wrapped component;
+\emph{``run to completion''} (\emph{full step} keyword) to repeatedly execute the wrapped component until no more internal signals are generated (applicable only to composite components);
+%executes as many cycles as needed to ensure all inner signals are processed and no additional steps could be taken.
+\emph{reset} (\emph{reset} keyword) to reinitialize the wrapped component to its initial state.
 
-Furthermore, synchronous component wrappers can contain zero or more \emph{clocks}, which emit tick
-events at defined timed intervals. Currently, seconds and milliseconds are supported as unit of measurements.
+%Furthermore, synchronous component wrappers can contain zero or more \emph{clocks}, which emit tick
+%events at defined timed intervals. Currently, seconds and milliseconds are supported as unit of measurements.
 
-The following code snippet presents an example wrapper model of the previously defined \textsl{CrossroadComponent}. \textsl{AsyncCrossroad} defines a single port \textsl{execution} on which the execution commands
-are expected. Messages received on port \textsl{execution} are stored in queue \textsl{executionQueue}, whereas
-the messages of additional (implicit) ports are stored in queue \textsl{crossroadsQueue}. They have default capacity (eight messages), whereas the priority of
-the former queue is higher. Owing to the control specifications, when a message \textsl{execute} is received,
-the wrapped component gets executed for a full step, that is, as many cycles as needed to
-process all signals of each contained components of the wrapped component. When either
-a clock signal or an \textsl{interrupt} signal of port \textsl{police} is received, the wrapped
-component is executed for a single cycle.
+The following code snippet presents an example wrapper for the previously defined \emph{CrossroadComponent}, which defined a control port named \emph{execution}. Messages received on this port are stored in the higher priority \emph{executionQueue}, whereas
+the messages of additional (implicit) ports are stored in the other queue \emph{crossroadsQueue} which has a capacity of 5. According to the control specifications, upon processing an \emph{execute} message, the wrapped component is run to completion, while either
+a clock signal or an \emph{interrupt} signal of port \emph{police} triggers a single execution.
 \begin{lstlisting}
 async AsyncCrossroad of CrossroadComponent [
-  // External port of the wrapper
-  port execution : requires Executable
+  // Additional control ports
+  port execution : provides Executable
 ] {
-  // Clock
-  clock clockSignal  ( rate = 100 ms)
+  // Clock definitions
+  clock clockSignal(rate = 100 ms)
   // Control specifications
   when execution.execute / full step
   when clockSignal / run
   when police.interrupt / run
   // Message queues
-  queue executionQueue(priority = 2) {
+  queue executionQueue(priority=2) {
     execution.execute, clockSignal
   }
-  queue crossroadsQueue(priority = 1) {
+  queue crossroadsQueue(priority=1, capacity=5) {
     police.any, priorityLightOutput.any, secondaryLightOutput.any
   }
 }
 \end{lstlisting}
 \paragraph{Asynchronous composite component}
-Asynchronous composite components support the hierarchical definition of asynchronous components, i.e., synchronous component wrappers and other Asynchronous composite components. Similarly to synchronous composite components, an asynchronous composite
-component consists of port bindings and channels in addition asynchronous component instances, which must refer to an asynchronous component as type. It is important that contained composite instances cannot have synchronous components as types in asynchronous
-composite components. Instead, synchronous component wrappers can be used, which assign asynchronous behavior to synchronous components.
+Asynchronous composite components support the hierarchical definition of asynchronous components, just like synchronous composite components do for the synchronous case. The structure of asynchronous composite components is identical to their synchronous counterparts, but the type of constituent components must be asynchronous, \ie either synchronous component rappers of other composite components. The execution semantics of constituent components is totally asynchronous, any component may be executed any time, given that their message queues are not empty. Produced messages are placed into message queues of components on the other end of channels, and there is no restriction on how ports are connected.
+Note that the hierarchy of asynchronous components may always be flattened without affecting the meaning of the model.
 
-\subsection{Summary}
-As a summary of \gamma\ composition modes, Figure \ref{fig:gamma-object-tree} presents the containment hierarchy of an example composite model. Note that the synchronous and asynchronous domain can be bridged only by synchronous composite wrappers. Furthermore, the leaves, which generally define the behavior of composite components, are always statechart definitions.
+%i.e., synchronous component wrappers and other Asynchronous composite components. Similarly to synchronous composite components, an asynchronous composite
+%component consists of port bindings and channels in addition asynchronous component instances, which must refer to an asynchronous component as type. It is important that contained composite instances cannot have synchronous components as types in asynchronous
+%composite components. Instead, synchronous component wrappers can be used, which assign asynchronous behavior to synchronous components.
 
-\begin{figure}[htbp]
-	\center
-	%	\resizebox{140mm}{!}{
-	\includegraphics[width=1.0\linewidth]{figures/gamma_object_tree.pdf}
-	%	}
-	\caption{A composite model hierarchy in \gamma.}
-	\label{fig:gamma-object-tree}
-\end{figure}
+%\subsection{Summary}
+%As a summary of \gamma\ composition modes, Figure \ref{fig:gamma-object-tree} presents the containment hierarchy of an example composite model. Note that the synchronous and asynchronous domain can be bridged only by synchronous composite wrappers. Furthermore, the leaves, which generally define the behavior of composite components, are always statechart definitions.
+
+%\begin{figure}[htbp]
+%	\center
+%	%	\resizebox{140mm}{!}{
+%	\includegraphics[width=1.0\linewidth]{figures/gamma_object_tree.pdf}
+%	%	}
+%	\caption{A composite model hierarchy in \gamma.}
+%	\label{fig:gamma-object-tree}
+%\end{figure}
 
 \section{Conclusion and Future Work}
 \label{sec:conclusion}
-The \framework\ is a modeling tool that supports the development of reactive systems by offering hierarchical composition of statechart components. The three distinguished composition modes are the asynchronous-reactive, the synchronous-reactive and cascade. Asynchronous components represent independently running components, which communicate with immutable messages stored in message queues. This semantics is suitable for designing
-separate units executed in their own processes. Synchronous-reactive components are useful for providing a single executing unit consisting of multiple, decomposed components.
-This composition mode is beneficial for the design of synchronous systems. Cascade composition is practical for designing units with pipeline-like behavior: the input given into the model is processed by multiple consecutive filters in a single turn.
+In this paper, we have proposed an extension to the composition language of the \framework, a modeling tool that supports the development of reactive systems by offering hierarchical composition of statechart components. The three semantic variants for composition are the asynchronous-reactive, synchronous-reactive and cascade composition semantics. Asynchronous components represent independently running components, which communicate with messages stored in message queues. This semantics is suitable for designing
+distributed or parallel processes. Synchronous-reactive components are useful for modeling a single executing unit consisting of multiple, functionally decomposed components.
+This composition mode is for the design of different aspects of a complex, but single-threaded component. Cascade composition is practical for designing units with pipeline-like behavior: the input fed into the model is processed by multiple consecutive filters in a single run.
 
-Subject to future work, we plan to extend the code generation and formal verification services of \gamma\ to support the aforementioned composition modes, as currently only the synchronous-reactive composition mode is supported. Code generation can be completed rather easily as we already have detailed plans on how these modeling modes should be implemented. However, the formal analysis of asynchronous-reactive models will be a challenge, as model checkers are not able to cope with the state space generated by the possible interleaving of dispatched/received messages.
+Subject to future work, we plan to extend the code generation and formal verification services of \gamma\ to support the proposed language and the semantic variants it introduces. For code generation, we already have code templates for the more significant methods. The formal analysis of asynchronous-reactive models, however, will be worth more research, as the interleaving semantics of asynchronous models poses a serious challenge to model checkers that should be (at least partly) handled in the transformation to the formal input models of these tools.
 
 \section*{Acknowledgment}
 \begin{figure}[!h]
 	\centering
 	\includegraphics[width=0.12\textwidth]{figures/unkp_logo.jpg}
 \end{figure}
-Supported by the ÚNKP-17-2-I New National Excellence Program of the Ministry of Human Capacities.
+Supported by the \'UNKP-17-2-I New National Excellence Program of the Ministry of Human Capacities.
