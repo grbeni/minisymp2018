@@ -21,9 +21,9 @@ Statecharts \cite{Harel:1987:SVF:34884.34886} are a widely used formalism to des
 
 The requirements such systems have to meet are getting more complex, which can result in very large system models, hindering verifiability, maintenance and extensibility. A well-known solution for managing complexity is decomposition. In case of statecharts, one way of decomposition is to define individual reactive components that, by means of communication, realize a more complex behavior. There are a number of modeling tools that aim to support this practice with various model-driven software development techniques such as code generation and verification.
 
-The Gamma Statechart Composition Framework is one such tool, providing a layer for composing individual statechart components (possibly coming from other tools) while extending the capabilities of automatic code generation and verification and validation (V\&V). In this paper, we propose a new composition language for Gamma that enables the hierarchical mixing of different composition semantics, with a focus on features and modeling aspects.
+The \gamma\ Statechart Composition Framework is one such tool, providing a layer for composing individual statechart components (possibly coming from other tools) while extending the capabilities of automatic code generation and verification and validation (V\&V). Functionalities of the \gamma\ Framework as well as a case study are presented in \cite{graics-bence-bsc}. In this paper, we propose a new composition language for \gamma\ that enables the hierarchical mixing of different composition semantics, with a focus on features and modeling aspects.
 
-\textbf{Asynchronous-reactive:} Such models represent a set of components that are executed independently. Asynchronous components communicate by means of messages and message queues. This semantics is convenient when decomposition is both logical and physical, \eg for the design of communicating microservices running in different processes.
+\textbf{Asynchronous-reactive:} Such models represent a set of components that are executed independently. Asynchronous components communicate by means of messages and message queues. This semantics is convenient when decomposition is both logical and physical, \eg for the design of communicating controller services running in different processes.
 	
 \textbf{Synchronous-reactive:} A synchronous model represents a coherent unit with a single functionality consisting of concurrent (but not independent) components executed in a lockstep fashion. Contained components communicate in a synchronous manner using signals. This semantics is suitable for the logical decomposition of synchronous systems or the modeling of hardware-related designs.
 	
@@ -109,11 +109,12 @@ built from individual reactive components. The design of composite systems start
 \subsection{Communication Elements}
 \label{sec:communication-elements}
 
-In the GCL, components communicate through \emph{ports}. Each port defines a point of service through which certain \emph{event notifications} can be sent or received. An event notification (or event for short) is a piece of information passed between components, which can also have \emph{parameters} to forward data. Events are declared on \emph{interfaces}, which may be realized by ports. An event may be declared as \emph{input}, \emph{output} or \emph{in/out}, which means that it can be received, sent or both through the realizing port. The declared direction will be reversed, however, if the port does not \emph{provide}, but \emph{require} the interface, which are the two possible modes in which a port can realize an interface. A \emph{broadcast interface} is a special type of interface on which every event is \emph{output}. This approach is similar to how the Franca Interface Definition Language defines interfaces.\footnote{\url{http://www.eclipse.org/proposals/modeling.franca/}}
+In the GCL, components communicate through \emph{ports}. Each port defines a point of service through which certain \emph{event notifications} can be sent or received. An event notification (or event for short) is a piece of information passed between components, which can also have \emph{parameters} to forward data. An event is called \emph{message} in case of asynchronous components and \emph{signal} in case of synchronous components. Events are declared on \emph{interfaces}, which may be realized by ports. An event may be declared as \emph{input}, \emph{output} or \emph{in/out}, which means that it can be received, sent or both through the realizing port. The declared direction will be reversed, however, if the port does not \emph{provide}, but \emph{require} the interface, which are the two possible modes in which a port can realize an interface. A \emph{broadcast interface} is a special type of interface on which every event is \emph{output}. This approach is similar to how the Franca Interface Definition Language defines interfaces.\footnote{\url{http://www.eclipse.org/proposals/modeling.franca/}}
 
 The concept of input and output events with the two modes of interface realization may be unusual at first sight, since ports in UML-like modeling languages support event reception and method declarations only, both of which are services that can be invoked. Our goal with this solution is to investigate the possibilities of precise interface-based communication in the domain of reactive systems. On the other hand, it is possible to use only \emph{out} events on every interface -- then provided mode is ``output'' mode and required
 mode is ``input'' mode.
 
+The following snippet defines an interface that has a single input event with an integer parameter as well as an interface with a single output event, that is, a broadcast interface. 
 %Interfaces serve as contracts between
 %interacting components of \gamma\ models. These contracts apply to the ability of dispatching
 %and receiving certain events. Events represent occurrences of some importance. Directions of events can be in, out or in-out;
@@ -121,8 +122,7 @@ mode is ``input'' mode.
 %parameter declarations, which provide additional information about the corresponding event. An example interface definition can be seen below.
 \begin{lstlisting}
 interface Status {
-  in event query
-  out event status(code : integer)
+  in event query(code: integer) // Integer parameter
 }
 interface PoliceInterrupt { // A broadcast interface
   out event interrupt
@@ -181,7 +181,7 @@ component crossroadInstance : Crossroad
 
 \begin{lstlisting}
 // Binding component ports to internal ports
-bind police -> controller.police
+bind police -> controller.policeInterrupt
 bind priorityLight -> priorityLight.lightCommands
 \end{lstlisting}
 
@@ -203,7 +203,7 @@ Communication may happen through \emph{channels}. \emph{Simple channels} can con
 // A simple and a broadcast channel
 channel [controller.priotityControl] -o)-
   [priorityLight.control]
-channel [controller.police] -o)-
+channel [controller.policeInterrupt] -o)-
   [priorityLight.police, secondaryLight.police]
 \end{lstlisting}
 
@@ -311,7 +311,7 @@ async AsyncCrossroad of CrossroadComponent [
   port execution : provides Executable
 ] {
   // Clock definitions
-  clock clockSignal(rate = 100 ms)
+  clock clockSignal(rate=100 ms)
   // Control specifications
   when execution.execute / full step
   when clockSignal / run
@@ -321,7 +321,7 @@ async AsyncCrossroad of CrossroadComponent [
     execution.execute, clockSignal
   }
   queue crossroadsQueue(priority=1, capacity=5) {
-    police.any, priorityLightOutput.any, secondaryLightOutput.any
+    police.any,priorityLight.any,secondaryLight.any
   }
 }
 \end{lstlisting}
@@ -351,13 +351,13 @@ In this paper, we have proposed an extension to the composition language of the 
 distributed or parallel processes. Synchronous-reactive components are useful for modeling a single executing unit consisting of multiple, functionally decomposed components.
 This composition mode is for the design of different aspects of a complex, but single-threaded component. Cascade composition is practical for designing units with pipeline-like behavior: the input fed into the model is processed by multiple consecutive filters in a single run.
 
-Subject to future work, we plan to extend the code generation and formal verification services of \gamma\ to support the proposed language and the semantic variants it introduces. For code generation, we already have code templates for the more significant methods. The formal analysis of asynchronous-reactive models, however, will be worth more research, as the interleaving semantics of asynchronous models poses a serious challenge to model checkers that should be (at least partly) handled in the transformation to the formal input models of these tools.
+Subject to future work, we plan to extend the code generation and formal verification services of \gamma\ to support the proposed language and the semantic variants it introduces. For code generation, we already have code templates for the more significant methods. The formal analysis of asynchronous-reactive models, however, will be worth more research, as the interleaving semantics of asynchronous models poses a serious challenge to model checkers that should be handled in the transformation to the formal input models of these tools.
 
 \section*{Acknowledgment}
-\vspace{-0.3cm}
-\begin{figure}[!h]
-	\centering
-	\includegraphics[width=0.10\textwidth]{figures/unkp_logo.jpg}
-\end{figure}
-\vspace{-0.28cm}
+%\vspace{-0.3cm}
+%\begin{figure}[!h]
+%	\centering
+%	\includegraphics[width=0.10\textwidth]{figures/unkp_logo.jpg}
+%\end{figure}
+%\vspace{-0.28cm}
 Partially supported by the \'UNKP-17-2-I and \'UNKP-17-3-I New National Excellence Program of the Ministry of Human Capacities.
