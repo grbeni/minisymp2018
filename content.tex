@@ -23,16 +23,20 @@ The requirements such systems have to meet are getting more complex, which can r
 
 The \gamma\ Statechart Composition Framework is one such tool, providing a layer for composing individual statechart components (possibly coming from other tools) while extending the capabilities of automatic code generation and verification and validation (V\&V). Functionalities of the \gamma\ Framework as well as a case study are presented in \cite{graics-bence-bsc}. In this paper, we propose a new composition language for \gamma\ that enables the hierarchical mixing of different composition semantics, with a focus on features and modeling aspects.
 
-\textbf{Asynchronous-reactive:} Such models represent a set of components that are executed independently. Asynchronous components communicate by means of messages and message queues. This semantics is convenient when decomposition is both logical and physical, \eg for the design of communicating controller services running in different processes.
+\textbf{Asynchronous-reactive:} Such models represent a set of components that are executed independently. Asynchronous components communicate by means of messages and message queues. This semantics is convenient when decomposition is both logical and physical, \eg for distributed controllers.
 	
-\textbf{Synchronous-reactive:} A synchronous model represents a coherent unit with a single functionality consisting of concurrent (but not independent) components executed in a lockstep fashion. Contained components communicate in a synchronous manner using signals. This semantics is suitable for the logical decomposition of synchronous systems or the modeling of hardware-related designs.
+\textbf{Synchronous-reactive:} A synchronous model represents a coherent unit consisting of strongly coupled but concurrent components which communicate in a synchronous manner using signals. This semantics is suitable for the logical decomposition of synchronous systems or the modeling of hardware-related designs.
 	
-\textbf{Cascade:} Cascade models represent a set of filters that are applied sequentially to derive an output from an input. Like synchronous-reactive components, cascade components also facilitate the logical decomposition of a problem, but it focuses more heavily on process-like models. Therefore, this model supports the design of adapters, runtime monitors and units with a batch-like execution.
+\textbf{Cascade:} Cascade models represent a set of filters that are applied sequentially to derive an output from an input. This variant supports the design of adapters, runtime monitors and units with a batch-like execution.
+
+%The main advantage of the new language is the ability to mix the above semantics hierarchically, using the most suitable variant for the different levels of decomposition.
 
 The rest of the paper is structured as follows. Section~\ref{sec:related-tools} presents a short summary of tools that inspired the design of the composition language. The elements of the language itself and an example are introduced in Section \ref{sec:composition-language}. Finally, Section \ref{sec:conclusion} provides concluding remarks and ideas for future work.
 
 \section{Related Tools}
 \label{sec:related-tools}
+
+We present three tools that also support the \emph{mixing of different composition semantics} for component-based systems.
 
 \ptolemy\footnote{\url{http://ptolemy.eecs.berkeley.edu/}} \cite{ptolemy,ptolemy2} is an open-source framework aiming to support
 the modeling of hierarchical composite systems with numerous component variants and communication semantics. Communication semantics are determined by \emph{directors}, which are responsible for defining a \emph{model of computation} on a particular hierarchy level. Various directors (e.g., process network, synchronous data flow
@@ -122,7 +126,8 @@ The following snippet defines an interface that has a single input event with an
 %parameter declarations, which provide additional information about the corresponding event. An example interface definition can be seen below.
 \begin{lstlisting}
 interface Status {
-  in event query(code: integer) // Integer parameter
+  in event query
+  out event status(code: integer) // Integer parameter
 }
 interface PoliceInterrupt { // A broadcast interface
   out event interrupt
@@ -221,7 +226,7 @@ When executed, synchronous components process incoming signals
 and produce output signals in accordance with their internal states. Input signals are not queued but sampled: upon execution, the component can access the most recent signal for every event on every port since the last execution (if any). Similarly, output signals are reset in every execution and every output event on every port may get a new signal assigned to it.
 %produced for a single execution period only, i.e., another execution might produce different
 %output signals overwriting the output signals of the previous one. 
-Synchronous components in \gamma\ are \emph{synchronous} and \emph{cascade composite components} and \emph{statechart definitions}.% (described in the GSL).
+Synchronous components in \gamma\ are \emph{synchronous} and \emph{cascade composite components} that can be freely mixed and \emph{statechart definitions} as atomic components.% (described in the GSL).
 
 \paragraph{Synchronous composite component} 
 During the execution of a synchronous composite component, every constituent component is executed exactly once. The execution has two phases: \textit{1)} all components sample their inputs, then \textit{2)} outputs and new internal states are computed. This strategy guarantees that an output generated by a component will affect other components only in the next execution -- therefore the execution order is insignificant and the composition of deterministic components yields a deterministic composite component. This behavior was one of the most important design goals for synchronous-reactive compositions.
@@ -278,7 +283,7 @@ Asynchronous components represent independently running instances that communica
 %Asynchronous components communicate with each other via ports using buffered \emph{messages}.
 There are two types of asynchronous components in \gamma: \emph{asynchronous composite components} and \emph{synchronous component wrappers}.
 
-\paragraph{Synchronous component wrapper} A synchronous component wrapper is used to declare an asynchronous component implemented by a single synchronous component. In addition to the ports of the wrapped component, synchronous component wrappers may declare additional ports for control messages, as well as zero or more \emph{clocks}, which emit \emph{tick} events at defined timed intervals.
+\paragraph{Synchronous component wrapper} A synchronous component wrapper is used to declare an asynchronous component implemented by a single synchronous component, facilitating the hierarchical mixing of the composition variants. In addition to the ports of the wrapped component, synchronous component wrappers may declare additional ports for control messages, as well as zero or more \emph{clocks}, which emit \emph{tick} events at defined timed intervals.
 
 A synchronous component wrapper has one or more
 \emph{message queues}, which have the following attributes: \emph{capacity} specifies the maximum number of messages that can be stored in the particular	queue; \emph{priority} specifies the order in which message queues are processed during 	the execution of the asynchronous component (the next message is always retrieved from a non-empty queue with the highest priority); \emph{event types} specify the messages that will be put in the particular queue. Messages can be referred to either by specifically naming an event on a port, referring to all events on a port (with the \emph{any} keyword instead of an event), or specifying the name of a clock to refer to its tick event.
@@ -287,8 +292,7 @@ During execution, messages are retrieved individually from messages queues. A me
 is always taken from the highest priority non-empty queue. If the particular message was
 received on a port that is implicitly derived from the wrapped component, the message is
 converted to a signal (as synchronous components communicate with signals) and transmitted
-to the wrapped synchronous component (potentially overwriting previously sent signals). If
-it was received on a port explicitly defined on the wrapper component, the message is not transmitted.
+to the wrapped synchronous component (potentially overwriting previously sent signals). Otherwise, the message is not transmitted.
 
 A synchronous component wrapper also has one or more \emph{control specifications}, which describe when and how to execute the wrapped component. The trigger messages can be specified by referring to events as in case of message queues, while the execution mode can be one of the following: 
 %specify the message types that are able to trigger the execution of wrapped component.
@@ -311,7 +315,7 @@ async AsyncCrossroad of CrossroadComponent [
   port execution : provides Executable
 ] {
   // Clock definitions
-  clock clockSignal(rate=100 ms)
+  clock clockSignal(rate=100ms)
   // Control specifications
   when execution.execute / full step
   when clockSignal / run
@@ -321,7 +325,8 @@ async AsyncCrossroad of CrossroadComponent [
     execution.execute, clockSignal
   }
   queue crossroadsQueue(priority=1, capacity=5) {
-    police.any,priorityLight.any,secondaryLight.any
+    police.any,priorityLight.any,
+    secondaryLight.any
   }
 }
 \end{lstlisting}
@@ -347,7 +352,9 @@ Note that the hierarchy of asynchronous components may always be flattened witho
 
 \section{Conclusion and Future Work}
 \label{sec:conclusion}
-In this paper, we have proposed an extension to the composition language of the \framework, a modeling tool that supports the development of reactive systems by offering hierarchical composition of statechart components. The three semantic variants for composition are the asynchronous-reactive, synchronous-reactive and cascade composition semantics. Asynchronous components represent independently running components, which communicate with messages stored in message queues. This semantics is suitable for designing
+In this paper, we have proposed an extension to the composition language of the \framework\ to support the mixing of
+%a modeling tool that supports the development of reactive systems by offering hierarchical composition of statechart components. 
+three semantic variants for the composition of reactive components: asynchronous-reactive, synchronous-reactive and cascade semantics. Asynchronous components represent independently running components, which communicate with messages stored in message queues. This semantics is suitable for designing
 distributed or parallel processes. Synchronous-reactive components are useful for modeling a single executing unit consisting of multiple, functionally decomposed components.
 This composition mode is for the design of different aspects of a complex, but single-threaded component. Cascade composition is practical for designing units with pipeline-like behavior: the input fed into the model is processed by multiple consecutive filters in a single run.
 
